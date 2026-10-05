@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Rue des Compétences · CAP EPC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#EEF3F8; --surface:#FFFFFF; --ink:#1D2433; --muted:#566074; --line:#D3DBE6;
+  --street:#2E3A4F; --pave:#46546C;
+  --b1:#D99A00; --b1-soft:#FFF3CC; --b2:#0E9C92; --b2-soft:#D6F2EF; --b3:#D9434F; --b3-soft:#FCE1E3; --b4:#6A4FD3; --b4-soft:#E9E4FB;
+  --ok:#1E8F4E; --ok-soft:#DBF3E5; --ko:#C23434; --ko-soft:#FADFDF; --focus:#2F63D0;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131924; --surface:#1D2532; --ink:#E9EFF7; --muted:#A4AFC3; --line:#334056;
+    --street:#0C1118; --pave:#222C3B;
+    --b1-soft:#3A2F0E; --b2-soft:#0E3330; --b3-soft:#3D1A1F; --b4-soft:#2A2350; --ok-soft:#113220; --ko-soft:#3A1616;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131924; --surface:#1D2532; --ink:#E9EFF7; --muted:#A4AFC3; --line:#334056;
+  --street:#0C1118; --pave:#222C3B;
+  --b1-soft:#3A2F0E; --b2-soft:#0E3330; --b3-soft:#3D1A1F; --b4-soft:#2A2350; --ok-soft:#113220; --ko-soft:#3A1616;
+  color-scheme: dark;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+body{ margin:0; background:var(--bg); color:var(--ink); font:400 17px/1.55 "Atkinson Hyperlegible", "Verdana", sans-serif; }
+h1,h2,h3{ font-family:"Fredoka","Trebuchet MS",sans-serif; font-weight:600; line-height:1.2; margin:0 0 .5em; }
+h1{ font-size:1.9rem; } h2{ font-size:1.45rem; } h3{ font-size:1.15rem; }
+p{ margin:0 0 .8em; }
+button,input,textarea{ font:inherit; color:inherit; }
+button{ cursor:pointer; }
+:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+.wrap{ max-width:1080px; margin:0 auto; padding:16px; }
+.narrow{ max-width:720px; margin:0 auto; }
+
+/* Barre du haut */
+.top{ background:var(--street); color:#fff; }
+.top .wrap{ display:flex; align-items:center; gap:12px; padding-top:12px; padding-bottom:12px; flex-wrap:wrap; }
+.brand{ font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.25rem; margin-right:auto; display:flex; align-items:center; gap:8px; }
+.brand span{ font-size:1.4rem; }
+.pill{ background:rgba(255,255,255,.14); border-radius:999px; padding:4px 12px; font-size:.95rem; }
+.btn{ border:2px solid transparent; border-radius:12px; padding:10px 18px; background:var(--street); color:#fff; font-weight:700; }
+.btn:hover{ filter:brightness(1.12); }
+.btn:disabled{ opacity:.45; cursor:not-allowed; filter:none; }
+.btn.ghost{ background:transparent; color:var(--ink); border-color:var(--line); }
+.top .btn.ghost{ color:#fff; border-color:rgba(255,255,255,.35); padding:6px 14px; }
+.btn.big{ padding:14px 24px; font-size:1.1rem; }
+.link{ background:none; border:none; color:var(--muted); text-decoration:underline; padding:4px; }
+
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:22px; }
+.muted{ color:var(--muted); }
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+/* Connexion */
+.login{ min-height:100%; display:grid; place-items:center; padding:24px 16px; }
+.login .card{ max-width:440px; width:100%; }
+.field{ display:block; margin:14px 0; }
+.field input{ width:100%; padding:12px 14px; border-radius:12px; border:2px solid var(--line); background:var(--bg); }
+.hint{ font-size:.9rem; color:var(--muted); }
+.error{ color:var(--ko); font-weight:700; min-height:1.4em; }
+
+/* La rue */
+.street{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; align-items:start; margin-top:12px; }
+.shop{ background:var(--surface); border:2px solid var(--line); border-radius:6px 6px 14px 14px; overflow:hidden; }
+.awning{ height:44px; position:relative;
+  background:repeating-linear-gradient(90deg, var(--c) 0 28px, #fff 28px 56px); }
+.awning::after{ content:""; position:absolute; left:0; right:0; bottom:-14px; height:14px;
+  background:radial-gradient(circle at 14px 0, var(--c) 13px, transparent 14px) 0 0/28px 14px repeat-x; }
+.shop .sign{ padding:24px 16px 10px; text-align:center; }
+.shop .sign h2{ margin:0; font-size:1.3rem; }
+.shop .sign p{ margin:4px 0 0; font-size:.92rem; color:var(--muted); }
+.doors{ padding:8px 12px 14px; display:grid; gap:8px; }
+.door{ text-align:left; width:100%; border:2px solid var(--line); background:var(--bg); border-radius:12px; padding:10px 12px; display:grid; grid-template-columns:auto 1fr; gap:2px 10px; align-items:center; }
+.door:hover:not(:disabled){ border-color:var(--c); }
+.door .code{ grid-row:span 2; font-family:"Fredoka",sans-serif; font-weight:700; background:var(--soft); color:var(--ink); border-radius:8px; padding:4px 8px; min-width:44px; text-align:center; }
+.door .t{ font-weight:700; line-height:1.3; }
+.door .s{ font-size:.85rem; color:var(--muted); display:flex; gap:6px; align-items:center; }
+.door:disabled{ cursor:default; opacity:.6; }
+.dots{ display:inline-flex; gap:4px; }
+.dot{ width:11px; height:11px; border-radius:50%; border:2px solid var(--c); }
+.dot.on{ background:var(--c); }
+.door.full{ border-color:var(--c); background:var(--soft); }
+.pavement{ height:26px; margin-top:22px; border-radius:8px; background:repeating-linear-gradient(90deg,var(--pave) 0 60px,var(--street) 60px 64px); }
+
+/* Tremplin */
+.tremplin{ margin-top:26px; }
+.tremplin .doors{ grid-template-columns:repeat(2,1fr); }
+.invite{ margin-top:26px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; border:2px dashed var(--b4); background:var(--b4-soft); border-radius:18px; padding:18px 20px; }
+.invite p{ margin:0; flex:1 1 300px; }
+.btn.violet{ background:var(--b4); }
+@media (max-width:820px){ .tremplin .doors{ grid-template-columns:1fr; } }
+/* Compétence */
+.back{ margin:8px 0 14px; }
+.exo{ display:flex; gap:14px; align-items:center; width:100%; text-align:left; border:2px solid var(--line); background:var(--surface); border-radius:16px; padding:16px; margin-bottom:12px; }
+.exo:hover{ border-color:var(--c); }
+.exo .ic{ font-size:1.8rem; width:52px; height:52px; display:grid; place-items:center; border-radius:14px; background:var(--soft); flex:none; }
+.exo .t{ font-weight:700; font-size:1.05rem; }
+.exo .s{ font-size:.9rem; color:var(--muted); }
+.exo .st{ margin-left:auto; font-weight:700; white-space:nowrap; }
+.tag-ok{ color:var(--ok); } .tag-wait{ color:var(--b1); }
+.comment{ background:var(--b2-soft); border-radius:12px; padding:10px 14px; margin:-4px 0 14px; font-size:.95rem; }
+
+/* Jeu */
+.progress{ height:10px; background:var(--line); border-radius:99px; overflow:hidden; margin:6px 0 18px; }
+.progress div{ height:100%; background:var(--c); transition:width .3s; }
+.ctx{ background:var(--soft); border-radius:12px; padding:12px 14px; margin-bottom:14px; }
+.q{ font-size:1.2rem; font-weight:700; margin-bottom:16px; }
+.opts{ display:grid; gap:10px; }
+.opt{ text-align:left; padding:14px 16px; border-radius:12px; border:2px solid var(--line); background:var(--surface); font-weight:700; }
+.opt:hover:not(:disabled){ border-color:var(--c); }
+.opt.good{ background:var(--ok-soft); border-color:var(--ok); }
+.opt.bad{ background:var(--ko-soft); border-color:var(--ko); }
+.opt:disabled{ cursor:default; }
+.vf{ grid-template-columns:1fr 1fr; }
+.vf .opt{ text-align:center; font-size:1.2rem; padding:20px; }
+.timer{ height:8px; border-radius:99px; background:var(--line); overflow:hidden; margin-bottom:14px; }
+.timer div{ height:100%; background:var(--b1); width:100%; }
+.num{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.num input{ width:150px; font-size:1.3rem; padding:10px 12px; border-radius:12px; border:2px solid var(--line); background:var(--bg); text-align:right; }
+.fb{ margin-top:16px; border-radius:14px; padding:14px 16px; }
+.fb.ok{ background:var(--ok-soft); } .fb.ko{ background:var(--ko-soft); }
+.fb strong{ display:block; margin-bottom:4px; }
+table.doc{ width:100%; border-collapse:collapse; font-size:.95rem; background:var(--surface); border-radius:8px; overflow:hidden; }
+table.doc th, table.doc td{ border:1px solid var(--line); padding:6px 8px; text-align:left; }
+table.doc th{ background:var(--bg); }
+.result{ text-align:center; }
+.score{ font-family:"Fredoka",sans-serif; font-size:4rem; font-weight:700; line-height:1; margin:10px 0; color:var(--c); }
+.badge{ display:inline-flex; gap:10px; align-items:center; background:var(--soft); border:2px dashed var(--c); border-radius:16px; padding:10px 16px; margin:10px 0 16px; font-weight:700; }
+
+/* Rédaction */
+.steps{ display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+.steps span{ font-size:.85rem; padding:4px 10px; border-radius:99px; background:var(--line); color:var(--muted); }
+.steps span.on{ background:var(--c); color:#fff; }
+.redac{ display:grid; grid-template-columns:1.4fr 1fr; gap:16px; align-items:start; }
+textarea{ width:100%; min-height:300px; border-radius:14px; border:2px solid var(--line); background:var(--surface); padding:14px; line-height:1.6; resize:vertical; }
+.method ol{ padding-left:22px; margin:0 0 12px; }
+.method li{ margin-bottom:6px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.chip{ border:2px solid var(--c); background:var(--soft); border-radius:99px; padding:5px 12px; font-size:.9rem; }
+.check{ display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:12px; border:2px solid var(--line); margin-bottom:8px; background:var(--surface); cursor:pointer; }
+.check input{ width:22px; height:22px; margin-top:2px; flex:none; }
+.compare{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.paper{ white-space:pre-wrap; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px; font-size:.97rem; }
+ul.list{ margin:6px 0 10px; padding-left:20px; }
+
+/* Jeux */
+.jeu{ background:var(--c); color:#fff; border-radius:6px; padding:1px 6px; font-weight:700; font-size:.78rem; }
+.hud{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-weight:700; margin:4px 0 12px; }
+.ticket{ display:flex; gap:20px; flex-wrap:wrap; font-size:1.15rem; background:var(--soft); border-radius:12px; padding:12px 14px; margin-bottom:12px; }
+.tray{ border:2px dashed var(--line); border-radius:12px; padding:10px 12px; margin-bottom:12px; min-height:64px; }
+.given{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.mini{ border:1px solid var(--line); background:var(--bg); border-radius:8px; padding:2px 8px; font-size:.85rem; }
+.money{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; }
+.coin{ width:58px; height:58px; border-radius:50%; border:3px solid #B8860B; background:radial-gradient(circle at 35% 30%,#FFE9A6,#E2B13C); color:#3B2A00; font-weight:700; font-size:.85rem; }
+.coin.c1,.coin.c2,.coin.c5{ border-color:#8A4B25; background:radial-gradient(circle at 35% 30%,#F3B98C,#B8693A); color:#fff; width:48px; height:48px; }
+.coin.c100,.coin.c200{ border-color:#9A9A9A; background:radial-gradient(circle at 35% 30%,#FFF4C2,#D9B44A); }
+.bill{ min-width:84px; height:52px; border-radius:6px; border:2px solid rgba(0,0,0,.2); font-weight:700; color:#1D2433; }
+.b500{ background:#C9D3DD; } .b1000{ background:#F2B9B5; } .b2000{ background:#A9C8F0; } .b5000{ background:#F6C68A; }
+.money button:disabled{ opacity:.5; cursor:default; }
+.shelf{ border:3px solid var(--street); border-radius:10px; overflow:hidden; margin:10px 0 14px; }
+.lvl{ display:grid; grid-template-columns:130px 1fr; border-bottom:6px solid var(--street); min-height:64px; cursor:pointer; background:var(--surface); }
+.lvl:last-child{ border-bottom:none; }
+.lvl:hover{ background:var(--soft); }
+.lvlname{ background:var(--bg); padding:8px; font-weight:700; font-size:.88rem; display:flex; align-items:center; }
+.slot{ display:flex; flex-wrap:wrap; gap:6px; padding:8px; align-content:center; }
+.prod{ border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:6px 10px; font-weight:700; font-size:.9rem; }
+.prod.sel{ border-color:var(--c); background:var(--soft); box-shadow:0 0 0 3px var(--c); }
+.prod.good{ background:var(--ok-soft); border-color:var(--ok); } .prod.bad{ background:var(--ko-soft); border-color:var(--ko); }
+.tray2{ display:flex; flex-wrap:wrap; gap:8px; }
+.recap{ background:var(--bg); border-radius:12px; padding:12px 14px; margin-top:12px; text-align:left; font-size:.95rem; }
+.recap p{ margin:0 0 6px; }
+.belt{ height:150px; border-radius:12px; display:grid; place-items:center; margin-bottom:10px;
+  background:repeating-linear-gradient(90deg,var(--pave) 0 30px,var(--street) 30px 34px); background-size:68px 100%; animation:belt 1s linear infinite; }
+@keyframes belt{ to{ background-position:68px 0; } }
+.item{ background:var(--surface); border-radius:14px; padding:10px 18px; display:flex; flex-direction:column; align-items:center; gap:2px; box-shadow:0 6px 16px rgba(0,0,0,.25); }
+.item .big{ font-size:2.4rem; line-height:1; }
+.opts.tapis{ grid-template-columns:repeat(3,1fr); }
+.opts.tapis .opt{ text-align:center; }
+.hunt .hot{ width:100%; text-align:left; }
+.hot{ border:1px dashed transparent; background:none; padding:4px 6px; border-radius:6px; }
+.hot:hover{ border-color:var(--c); }
+.hot.found{ background:var(--ok-soft); border-color:var(--ok); }
+.labels{ display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px; }
+.hot.label{ background:#FFFDF2; color:#1D2433; border:2px solid #D9D2B0; border-radius:8px; padding:10px; text-align:left; line-height:1.4; }
+.hot.label.found{ background:var(--ok-soft); color:var(--ink); border-color:var(--ok); }
+.shake{ animation:shake .4s; background:var(--ko-soft) !important; }
+@keyframes shake{ 25%{ transform:translateX(-4px); } 75%{ transform:translateX(4px); } }
+.gauge{ display:inline-block; width:140px; height:12px; background:var(--line); border-radius:99px; overflow:hidden; }
+.gauge span{ display:block; height:100%; background:linear-gradient(90deg,var(--ko),var(--b1),var(--ok)); background-size:140px 100%; transition:width .4s; }
+.chat{ display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; margin-bottom:12px; }
+.msg{ max-width:85%; padding:10px 14px; border-radius:16px; }
+.msg.cli{ background:var(--bg); align-self:flex-start; border-bottom-left-radius:4px; }
+.msg.me{ background:var(--c); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+.msg.narr{ align-self:center; font-style:italic; color:var(--muted); text-align:center; }
+.ending{ background:var(--soft); border-radius:14px; padding:14px 16px; margin:12px 0; text-align:left; }
+.mem{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.mcard{ min-height:110px; border-radius:14px; border:2px solid var(--line); background:var(--c); color:#fff; padding:8px; font-size:.9rem; }
+.mcard .back{ font-family:"Fredoka",sans-serif; font-size:2rem; }
+.mcard .front{ display:none; }
+.mcard.on, .mcard.done{ background:var(--surface); color:var(--ink); }
+.mcard.on .back, .mcard.done .back{ display:none; }
+.mcard.on .front, .mcard.done .front{ display:block; }
+.mcard .term{ font-weight:700; font-size:1rem; }
+.mcard.done{ border-color:var(--ok); background:var(--ok-soft); }
+@media (max-width:620px){ .mem{ grid-template-columns:repeat(3,1fr); } .lvl{ grid-template-columns:90px 1fr; } .opts.tapis{ grid-template-columns:1fr; } .coin{ width:50px; height:50px; } }
+@media (prefers-reduced-motion: reduce){ .belt{ animation:none; } }
+
+.toastg{ position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(30px); background:var(--street); color:#fff; padding:12px 18px; border-radius:12px; opacity:0; transition:.3s; z-index:50; max-width:90%; text-align:center; pointer-events:none; }
+.toastg.on{ opacity:1; transform:translateX(-50%) translateY(0); }
+.codes{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; }
+.codecard{ border:2px dashed var(--line); border-radius:12px; padding:12px 14px; background:var(--surface); }
+.codecard .cd{ font-family:"Fredoka",sans-serif; font-size:1.6rem; letter-spacing:.12em; }
+@media print{ .top, .noprint{ display:none !important; } body{ background:#fff; color:#000; } .codecard{ break-inside:avoid; border-color:#999; } }
+/* Enseignant */
+.tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table.grid{ border-collapse:collapse; width:100%; font-size:.92rem; }
+table.grid th, table.grid td{ padding:8px 6px; border-bottom:1px solid var(--line); text-align:center; white-space:nowrap; }
+table.grid th:first-child, table.grid td:first-child{ text-align:left; padding-left:14px; }
+table.grid tbody tr{ cursor:pointer; }
+table.grid tbody tr:hover{ background:var(--bg); }
+.cell{ display:inline-block; min-width:38px; padding:3px 6px; border-radius:8px; font-weight:700; }
+.c-none{ color:var(--muted); }
+.c-part{ background:var(--b1-soft); }
+.c-full{ background:var(--ok-soft); color:var(--ok); }
+.c-off{ color:var(--line); }
+.legend{ display:flex; gap:14px; flex-wrap:wrap; font-size:.9rem; margin:10px 0 18px; color:var(--muted); }
+.att{ display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
+.att:last-child{ border-bottom:none; }
+.redbox{ border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:14px; background:var(--bg); }
+.redbox textarea{ min-height:70px; margin:8px 0; }
+.demo{ font-size:.85rem; background:var(--b1-soft); border-radius:12px; padding:10px 14px; margin-bottom:16px; }
+
+@media (max-width:820px){
+  .street{ grid-template-columns:1fr; }
+  .redac, .compare{ grid-template-columns:1fr; }
+  textarea{ min-height:220px; }
+  h1{ font-size:1.6rem; }
+}
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ===================== Contenus ===================== */
+const BLOCS = {
+  1:{ name:"Côté réserve", sub:"Bloc 1 · Recevoir et suivre les commandes", c:"var(--b1)", soft:"var(--b1-soft)" },
+  2:{ name:"Côté rayon", sub:"Bloc 2 · Mettre en valeur et approvisionner", c:"var(--b2)", soft:"var(--b2-soft)" },
+  3:{ name:"Côté client", sub:"Bloc 3 · Conseiller et accompagner le client", c:"var(--b3)", soft:"var(--b3-soft)" },
+  4:{ name:"Le tremplin 2nde MRC", sub:"Prendre de l'avance pour ton entrée en Seconde Bac Pro Métiers de la relation client", c:"var(--b4)", soft:"var(--b4-soft)" }
+};
+const COMPS = [
+  {id:"1.1",b:1,t:"Participer à la passation des commandes fournisseurs"},
+  {id:"1.2",b:1,t:"Réceptionner"},
+  {id:"1.3",b:1,t:"Stocker"},
+  {id:"1.4",b:1,t:"Préparer les commandes clients"},
+  {id:"2.1",b:2,t:"Approvisionner, mettre en rayon et ranger"},
+  {id:"2.2",b:2,t:"Mettre en valeur les produits et l'espace"},
+  {id:"2.3",b:2,t:"Participer au conditionnement"},
+  {id:"2.4",b:2,t:"Installer et mettre à jour la signalétique"},
+  {id:"2.5",b:2,t:"Lutter contre la démarque, participer à l'inventaire"},
+  {id:"3.1",b:3,t:"Préparer son environnement de travail"},
+  {id:"3.2",b:3,t:"Prendre contact avec le client"},
+  {id:"3.3",b:3,t:"Accompagner le parcours client omnicanal"},
+  {id:"3.4",b:3,t:"Finaliser la prise en charge du client"},
+  {id:"3.5",b:3,t:"Recevoir les réclamations courantes"},
+  {id:"T1",b:4,t:"Découvrir l'omnicanal"},
+  {id:"T2",b:4,t:"Suivre la relation client"},
+  {id:"T3",b:4,t:"Collecter et exploiter l'information"},
+  {id:"T4",b:4,t:"Les méthodes du lycée pro"}
+];
+const CATS = ["Conforme","Produit manquant","Produit non commandé","Erreur de référence","Produit abîmé"];
+function triRow(ref,p,c,l){
+  return '<table class="doc"><tr><th>Réf.</th><th>Produit</th><th>Commandé</th><th>Livré</th></tr><tr><td>'+ref+'</td><td>'+p+'</td><td>'+c+'</td><td>'+l+'</td></tr></table>';
+}
+const VENTES = '<table class="doc"><tr><th>Octobre</th><th>Chiffre d\'affaires</th><th>Nombre de tickets</th></tr>'+
+  '<tr><td>Semaine 1</td><td>4 200 €</td><td>140</td></tr><tr><td>Semaine 2</td><td>3 600 €</td><td>120</td></tr>'+
+  '<tr><td>Semaine 3</td><td>5 400 €</td><td>150</td></tr><tr><td>Semaine 4</td><td>4 800 €</td><td>160</td></tr></table>';
+const QTYPES = ["Question fermée","Question ouverte","Question à choix multiples","Question à échelle"];
+const EXOS = {
+ "1.2":{ place:"Supérette « Le Panier de Léo »", list:[
+  { id:"1.2-a", icon:"📦", title:"La livraison du mardi", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"Le bon de livraison indique 9 colis, mais le livreur n'en dépose que 8. Il est pressé et te demande de signer. Que fais-tu ?", o:["Je signe, je vérifierai plus tard","Je refuse toute la livraison","J'écris une réserve précise sur le bon de livraison, puis je signe","J'écris « sous réserve de déballage » et je signe"], a:2, e:"Une fois le bon signé sans réserve, la livraison est considérée comme conforme. Et une réserve vague comme « sous réserve de déballage » n'a aucune valeur : il faut écrire précisément le problème."},
+    {k:"qcm", q:"Pour vérifier que tu as bien reçu ce qui avait été commandé, tu compares le bon de livraison avec…", o:["la facture","le bon de commande","le devis","le bon de livraison précédent"], a:1, e:"Le bon de commande dit ce que le magasin a demandé. Le bon de livraison dit ce que le fournisseur a envoyé."},
+    {k:"qcm", q:"Vérifier que les cartons ne sont ni écrasés ni mouillés, c'est un contrôle…", o:["quantitatif","qualitatif","administratif"], a:1, e:"Le contrôle quantitatif porte sur le nombre. Le contrôle qualitatif porte sur l'état, les dates et la température."},
+    {k:"qcm", q:"Un carton de yaourts porte la mention « à conserver entre 0 °C et +4 °C ». Ton thermomètre indique 9 °C. Que fais-tu ?", o:["Je les range vite au frais, ça ira","Je préviens ma responsable : la chaîne du froid est rompue","Je les range au frais et je le signale en fin de journée"], a:1, e:"Un produit frais qui a dépassé sa température de conservation peut être dangereux. Il ne doit pas être mis en vente."},
+    {k:"qcm", q:"Tu as écrit une réserve sur le bon de livraison. Dans quel délai faut-il la confirmer au transporteur ?", o:["24 heures","3 jours","1 mois"], a:1, e:"La réserve se confirme par lettre recommandée dans les 3 jours, jours fériés non compris."},
+    {k:"qcm", q:"Pourquoi faut-il conserver le numéro de lot des produits reçus ?", o:["Pour connaître la date de livraison","Pour retrouver le produit en cas de rappel","Pour faire l'inventaire"], a:1, e:"Le numéro de lot assure la traçabilité : si un lot est rappelé, on sait tout de suite quels produits retirer."}
+  ]},
+  { id:"1.2-b", icon:"🔍", title:"Commande contre livraison", kind:"Le bon tri", min:4, steps:[
+    {k:"tri", ctx:triRow("1102","Jus d'orange 1 L","12","12"), q:"Que constates-tu sur cette ligne ?", o:CATS, a:0, e:"Même référence, même quantité, bon état : tout est conforme."},
+    {k:"tri", ctx:triRow("2205","Pâtes 500 g","24","20"), q:"Que constates-tu sur cette ligne ?", o:CATS, a:1, e:"4 paquets manquent : on les note en réserve et on les réclame au fournisseur."},
+    {k:"tri", ctx:triRow("3310","Riz basmati 1 kg","6","6 sous la réf. 3301 (riz long)"), q:"Que constates-tu sur cette ligne ?", o:CATS, a:3, e:"La quantité est bonne, mais ce n'est pas le bon produit : c'est une erreur de référence."},
+    {k:"tri", ctx:triRow("4418","Biscuits chocolat","0","5"), q:"Que constates-tu sur cette ligne ?", o:CATS, a:2, e:"Ces biscuits n'ont jamais été commandés : le fournisseur doit les reprendre."},
+    {k:"tri", ctx:triRow("5520","Eau gazeuse 6 × 1 L","10","10, dont 1 pack percé"), q:"Que constates-tu sur cette ligne ?", o:CATS, a:4, e:"La quantité est bonne, mais un pack est endommagé : c'est une anomalie de qualité."}
+  ]},
+  { id:"1.2-c", icon:"✉️", title:"Le courriel au fournisseur", kind:"Rédaction", min:5, redac:{
+    situation:"Tu es équipier ou équipière à la supérette « Le Panier de Léo ». Ce matin, tu as contrôlé la livraison n°4587 du fournisseur Distrimarché et tu as relevé 4 anomalies. Ta responsable te demande d'écrire un courriel au fournisseur pour les signaler.",
+    infos:["Réf. 2205, pâtes 500 g : 20 livrées au lieu de 24","Réf. 3310, riz basmati : du riz long (réf. 3301) a été livré à la place","Réf. 4418, biscuits chocolat : 5 livrés sans avoir été commandés","Réf. 5520, eau gazeuse : 1 pack percé"],
+    method:["Un objet précis : « Anomalies livraison n°… du … »","La formule d'appel","Qui tu es et de quelle livraison tu parles","La liste des anomalies : référence, produit, problème","Ce que tu demandes : renvoi, reprise, avoir","La formule de politesse et ta signature"],
+    amorces:["Objet : Anomalies sur la livraison n°4587","Madame, Monsieur,","Nous avons bien reçu votre livraison n°4587.","Lors du contrôle, nous avons constaté les anomalies suivantes :","Nous vous remercions de bien vouloir","Cordialement,"],
+    checks:["J'ai écrit un objet précis","J'ai indiqué le numéro de la livraison","J'ai cité les 4 anomalies avec leur référence","J'ai dit ce que j'attends du fournisseur","J'ai vouvoyé et utilisé une formule de politesse","Je me suis relu(e)"],
+    modele:"Objet : Anomalies sur la livraison n°4587\n\nMadame, Monsieur,\n\nNous avons bien reçu votre livraison n°4587 ce jour. Lors du contrôle, nous avons constaté les anomalies suivantes :\n- réf. 2205 (pâtes 500 g) : 4 produits manquants ;\n- réf. 3310 : nous avons reçu du riz long (réf. 3301) au lieu du riz basmati ;\n- réf. 4418 (biscuits chocolat) : 5 produits livrés sans avoir été commandés ;\n- réf. 5520 : un pack d'eau gazeuse percé.\n\nNous vous remercions de bien vouloir nous livrer les produits manquants et le riz basmati, reprendre les produits non commandés et nous adresser un avoir pour le pack abîmé.\n\nCordialement,\nInès Martin, équipière, Le Panier de Léo"
+  }}
+ ]},
+ "T3":{ place:"Boutique de sport « Le Vestiaire »", list:[
+  { id:"T3-a", icon:"📊", title:"Faire parler les chiffres", kind:"Calcul et lecture de tableau", min:5, steps:[
+    {k:"num", ctx:VENTES, q:"Quel est le chiffre d'affaires total du mois d'octobre ?", a:18000, e:"4 200 + 3 600 + 5 400 + 4 800 = 18 000 €."},
+    {k:"qcm", ctx:VENTES, q:"Quelle semaine a réalisé le plus gros chiffre d'affaires ?", o:["Semaine 1","Semaine 2","Semaine 3","Semaine 4"], a:2, e:"Avec 5 400 €, la semaine 3 est la meilleure du mois."},
+    {k:"num", ctx:VENTES, q:"Le panier moyen, c'est le chiffre d'affaires divisé par le nombre de tickets. Quel est le panier moyen de la semaine 1 ?", a:30, e:"4 200 ÷ 140 = 30 € : en moyenne, chaque client a dépensé 30 €."},
+    {k:"num", ctx:VENTES, q:"Quel est le panier moyen de la semaine 3 ?", a:36, e:"5 400 ÷ 150 = 36 €."},
+    {k:"num", u:"%", ctx:VENTES, q:"De combien de pourcents le chiffre d'affaires a-t-il augmenté entre la semaine 2 et la semaine 3 ?", a:50, e:"(5 400 − 3 600) ÷ 3 600 × 100 = 50 %. On divise toujours l'écart par la valeur de départ."},
+    {k:"qcm", ctx:VENTES, q:"La semaine 4 a eu le plus de clients, mais pas le plus gros chiffre d'affaires. Que peut-on en conclure ?", o:["Le magasin était fermé un jour","Les clients ont dépensé moins, en moyenne, que la semaine 3","Il y a forcément une erreur dans le tableau"], a:1, e:"Le panier moyen de la semaine 4 est de 30 € (4 800 ÷ 160), contre 36 € en semaine 3. Plus de clients ne veut pas dire plus de ventes."}
+  ]},
+  { id:"T3-b", icon:"📝", title:"Le bon questionnaire", kind:"Le bon tri", min:4, steps:[
+    {k:"tri", ctx:"« Êtes-vous satisfait de l'accueil ? Oui / Non »", q:"De quel type de question s'agit-il ?", o:QTYPES, a:0, e:"Une question fermée n'offre que deux réponses possibles : oui ou non."},
+    {k:"tri", ctx:"« Que pourrions-nous améliorer dans notre magasin ? »", q:"De quel type de question s'agit-il ?", o:QTYPES, a:1, e:"Le client répond librement, avec ses propres mots : c'est une question ouverte."},
+    {k:"tri", ctx:"« Comment nous avez-vous connus ? Réseaux sociaux / Bouche-à-oreille / Publicité / En passant devant »", q:"De quel type de question s'agit-il ?", o:QTYPES, a:2, e:"Le client choisit parmi plusieurs propositions : c'est une question à choix multiples."},
+    {k:"tri", ctx:"« Notez la propreté du magasin de 1 à 5 »", q:"De quel type de question s'agit-il ?", o:QTYPES, a:3, e:"Le client donne une note sur une échelle : on peut ensuite calculer une moyenne."},
+    {k:"qcm", q:"Tu veux connaître l'avis précis des clients, avec leurs propres mots. Quel type de question choisis-tu ?", o:["Une question fermée","Une question ouverte","Une question à échelle"], a:1, e:"Seule la question ouverte laisse le client s'exprimer librement. En revanche, ses réponses sont plus longues à analyser."},
+    {k:"qcm", q:"Avant de poser les questions à un client en magasin, que dois-tu faire ?", o:["Lui demander son numéro de téléphone","Lui expliquer le but de l'enquête et lui demander s'il accepte d'y répondre","Rien, il suffit de commencer"], a:1, e:"Le client doit savoir à quoi serviront ses réponses et rester libre de refuser."},
+    {k:"num", u:"%", ctx:"60 clients ont répondu au questionnaire. 45 se disent satisfaits.", q:"Quel est le taux de satisfaction ?", a:75, e:"45 ÷ 60 × 100 = 75 % : trois clients sur quatre sont satisfaits."}
+  ]},
+  { id:"T3-c", icon:"📋", title:"Le compte rendu d'enquête", kind:"Rédaction", min:6, redac:{
+    situation:"Tu es en stage à la boutique de sport « Le Vestiaire ». Pendant une semaine, tu as interrogé 40 clients sur leur satisfaction. Ton tuteur, M. Perrin, te demande un court compte rendu écrit (6 à 10 lignes) pour savoir ce qui va bien et ce qu'il faudrait améliorer.",
+    infos:["Accueil : 34 clients satisfaits sur 40","Choix des produits : 30 clients satisfaits sur 40","Temps d'attente en caisse : 16 clients satisfaits sur 40","Prix : 26 clients satisfaits sur 40"],
+    method:["Présenter l'enquête : quand, combien de clients","Calculer les pourcentages (satisfaits ÷ 40 × 100)","Donner les points forts, avec les chiffres","Donner le point faible, avec le chiffre","Proposer une amélioration réaliste","Terminer par une formule et signer"],
+    amorces:["Monsieur Perrin,","Du … au …, j'ai interrogé 40 clients sur leur satisfaction.","Les points forts sont","En revanche,","Pour améliorer ce point, je propose de","Je reste disponible pour en parler."],
+    checks:["J'ai présenté l'enquête (période, nombre de clients)","J'ai donné des pourcentages et non seulement des nombres","J'ai cité au moins deux points forts","J'ai identifié le point faible","J'ai fait une proposition d'amélioration","Mon texte fait au moins 6 lignes et je l'ai relu"],
+    modele:"Monsieur Perrin,\n\nDu 6 au 11 octobre, j'ai interrogé 40 clients sur leur satisfaction.\n\nLes points forts sont l'accueil, qui satisfait 85 % des clients, et le choix des produits (75 %). Les prix sont plutôt bien perçus, avec 65 % de clients satisfaits.\n\nEn revanche, seulement 40 % des clients sont satisfaits du temps d'attente en caisse : c'est le point à améliorer en priorité.\n\nPour améliorer ce point, je propose d'ouvrir une deuxième caisse le samedi après-midi, quand il y a le plus de monde.\n\nJe reste disponible pour en parler.\nInès Martin, stagiaire"
+  }}
+ ]},
+ "3.4":{ place:"Jardinerie « Les Jardins de Clara »", list:[
+  { id:"3.4-a", icon:"🪙", title:"La caisse du samedi", kind:"Calcul pratique", min:5, steps:[
+    {k:"num", ctx:"Ticket : <strong>13,40 €</strong><br>La cliente donne : <strong>20 €</strong>", q:"Combien de monnaie rends-tu ?", a:6.60, e:"20 − 13,40 = 6,60 €. Astuce : compte en remontant de 13,40 € jusqu'à 20 €."},
+    {k:"num", ctx:"Ticket : <strong>7,85 €</strong><br>Le client donne : <strong>10 €</strong>", q:"Combien de monnaie rends-tu ?", a:2.15, e:"10 − 7,85 = 2,15 €."},
+    {k:"num", ctx:"Ticket : <strong>26,30 €</strong><br>La cliente donne : <strong>50 €</strong>", q:"Combien de monnaie rends-tu ?", a:23.70, e:"50 − 26,30 = 23,70 €."},
+    {k:"num", ctx:"Ticket : <strong>18,75 €</strong><br>Le client donne : <strong>20,75 €</strong>", q:"Combien de monnaie rends-tu ?", a:2, e:"Le client a ajouté 0,75 € pour que tu lui rendes un compte rond : 2 €."},
+    {k:"num", ctx:"Ticket : <strong>42,10 €</strong><br>La cliente donne : <strong>50,10 €</strong>", q:"Combien de monnaie rends-tu ?", a:8, e:"50,10 − 42,10 = 8 €."},
+    {k:"num", ctx:"La carte de fidélité coûte <strong>15 €</strong> et donne <strong>10 %</strong> de réduction. Mme Roux dépense <strong>120 €</strong> dans l'année.", q:"Quelle réduction obtient-elle sur l'année ?", a:12, e:"10 % de 120 € = 12 €."},
+    {k:"qcm", ctx:"Carte à 15 €, 10 % de réduction. Mme Roux économise 12 € dans l'année.", q:"La carte est-elle rentable pour Mme Roux ?", o:["Oui","Non"], a:1, e:"Elle a payé 15 € pour économiser 12 € : elle perd 3 €."},
+    {k:"qcm", ctx:"Même carte : 15 €, 10 % de réduction. M. Diallo dépense 200 € dans l'année.", q:"La carte est-elle rentable pour M. Diallo ?", o:["Oui","Non"], a:0, e:"10 % de 200 € = 20 € de réduction pour 15 € payés : il gagne 5 €."}
+  ]},
+  { id:"3.4-b", icon:"⏱️", title:"Vrai ou faux express", kind:"Vrai ou faux chronométré", min:3, steps:[
+    {k:"vf", q:"Le ticket Z s'édite après chaque vente.", a:false, e:"Le ticket Z récapitule toute la journée : il s'édite à la clôture de la caisse."},
+    {k:"vf", q:"« Salut, à plus ! » est une prise de congé adaptée avec un client.", a:false, e:"On vouvoie le client et on utilise une formule polie : « Merci, bonne journée Madame. »"},
+    {k:"vf", q:"Le paiement sans contact par carte est plafonné à 50 € par opération.", a:true, e:"Au-delà de 50 €, le client doit saisir son code."},
+    {k:"vf", q:"Un client peut refuser de donner son adresse mail pour créer sa carte de fidélité.", a:true, e:"Le client choisit les données qu'il accepte de transmettre."},
+    {k:"vf", q:"Le magasin peut revendre les données de ses clients sans leur accord.", a:false, e:"C'est interdit par le RGPD, le règlement qui protège les données personnelles."},
+    {k:"vf", q:"La date de naissance du client permet de lui envoyer une offre d'anniversaire.", a:true, e:"C'est un moyen de personnaliser la relation et de le fidéliser."},
+    {k:"vf", q:"Une carte de fidélité payante est toujours rentable pour le client.", a:false, e:"Elle n'est rentable que si la réduction obtenue dépasse le prix de la carte."},
+    {k:"vf", q:"Un magasin peut refuser les chèques, à condition de l'afficher clairement.", a:true, e:"Le magasin doit informer ses clients avant le passage en caisse."}
+  ]},
+  { id:"3.4-c", icon:"👋", title:"La prise de congé", kind:"Rédaction", min:5, redac:{
+    situation:"Tu es en caisse à la jardinerie « Les Jardins de Clara ». Mme Ferrand vient d'acheter des plants de tomates et un gros sac de terreau. Elle a payé par carte et n'a pas de carte de fidélité. Écris la fin de l'échange, de la remise du ticket jusqu'au départ de la cliente (4 à 6 répliques).",
+    infos:["La carte de fidélité est gratuite","Elle offre un bon de 5 € tous les 100 € d'achats"],
+    method:["Remettre le ticket et les achats","Proposer un service utile (porter le terreau, un conseil de plantation)","Proposer la carte de fidélité avec un avantage concret","Remercier la cliente","Saluer en personnalisant et donner envie de revenir"],
+    amorces:["— Voici votre ticket, Madame Ferrand.","— Voulez-vous que je vous aide à","— Avez-vous notre carte de fidélité ?","— Merci pour votre visite,","— À bientôt aux Jardins de Clara !"],
+    checks:["J'ai vouvoyé la cliente","J'ai utilisé son nom","J'ai proposé un service","J'ai proposé la carte de fidélité","J'ai remercié","Ma formule de départ est polie et personnalisée"],
+    modele:"— Voici votre ticket, Madame Ferrand. Voulez-vous que je vous aide à porter le terreau jusqu'à votre voiture ?\n— Oh oui, volontiers, merci.\n— Avec plaisir. Avez-vous notre carte de fidélité ? Elle est gratuite et vous offre un bon de 5 € tous les 100 € d'achats.\n— Non, je ne l'ai pas, je veux bien.\n— Je vous la crée tout de suite. Merci pour votre visite, et bonne plantation pour vos tomates ! À bientôt aux Jardins de Clara."
+  }}
+ ]}
+};
+
+/* ===================== Contenus des autres zones ===================== */
+const CIRCUITS = ["Circuit direct (0 intermédiaire)","Circuit court (1 intermédiaire)","Circuit long (2 intermédiaires ou plus)"];
+const DECHETS = ["Bac papier-carton","Bac plastique","Retour fournisseur","Déchets dangereux (collecte spéciale)"];
+const PREPA = ["Click & collect","Drive","Picking","Ship from store"];
+const ZONES = ["Zone chaude","Zone froide"];
+const DATES = ["DLC : à retirer à la date","DDM : peut encore être vendu après la date"];
+const LV = ["ILV (information du magasin)","PLV (publicité de la marque)"];
+const DEMARQUE = ["Démarque connue","Démarque inconnue"];
+const CONTRATS = ["CDI","CDD","Contrat d'intérim"];
+const COMVERB = ["Verbal (les mots)","Paraverbal (la voix)","Non-verbal (le corps)"];
+const SONCASE = ["Sécurité","Orgueil","Nouveauté","Confort","Argent","Sympathie","Environnement"];
+const RECLA = ["Réclamation sur le produit","Réclamation sur le personnel","Réclamation sur le magasin ou le service"];
+const CANAUX = ["Canal physique","Canal digital"];
+const FIDE = ["Outil de fidélisation","Outil de mesure de la satisfaction"];
+
+Object.assign(EXOS, {
+ "1.1":{ place:"Supérette « Le Panier de Léo »", list:[
+  { id:"1.1-a", icon:"🚚", title:"Du producteur au client", kind:"Le bon tri", min:4, steps:[
+    {k:"tri", ctx:"Une ferme vend ses fromages directement aux clients, dans sa boutique.", q:"Quel est le circuit de distribution ?", o:CIRCUITS, a:0, e:"Le producteur vend directement au consommateur : aucun intermédiaire."},
+    {k:"tri", ctx:"Un apiculteur vend ses pots de miel à une épicerie fine, qui les revend à ses clients.", q:"Quel est le circuit de distribution ?", o:CIRCUITS, a:1, e:"Un seul intermédiaire, l'épicerie : c'est un circuit court."},
+    {k:"tri", ctx:"Une usine de biscuits vend à un grossiste, qui livre les supérettes, qui vendent aux clients.", q:"Quel est le circuit de distribution ?", o:CIRCUITS, a:2, e:"Grossiste puis supérette : deux intermédiaires, c'est un circuit long."},
+    {k:"tri", ctx:"Une créatrice vend ses bougies sur son propre site internet.", q:"Quel est le circuit de distribution ?", o:CIRCUITS, a:0, e:"Vendre en ligne sur son propre site reste de la vente directe."},
+    {k:"qcm", q:"Dans le circuit économique, la famille Martin qui fait ses courses est…", o:["une entreprise","un ménage","une administration","une banque"], a:1, e:"Les ménages consomment des biens et des services grâce à leurs revenus."},
+    {k:"qcm", q:"Le magasin propose des produits de producteurs de la région et trie ses déchets. Cela fait partie de…", o:["sa démarque","sa responsabilité sociétale (RSE)","son inventaire"], a:1, e:"La RSE, c'est la façon dont l'entreprise agit pour l'environnement et la société."}
+  ]},
+  { id:"1.1-b", icon:"🧮", title:"Combien commander ?", kind:"Calcul pratique", min:5, steps:[
+    {k:"qcm", q:"Une rupture de stock, c'est quand…", o:["le produit est en promotion","il n'y a plus le produit en magasin alors que des clients le demandent","le produit est abîmé"], a:1, e:"La rupture fait perdre des ventes et mécontente les clients."},
+    {k:"num", u:"paquets", ctx:"Café moulu 250 g<br>Ventes prévues la semaine prochaine : <strong>30</strong><br>Stock de sécurité souhaité : <strong>6</strong><br>Stock restant : <strong>8</strong>", q:"Combien de paquets faut-il commander ? (ventes prévues + stock de sécurité − stock restant)", a:28, e:"30 + 6 − 8 = 28 paquets."},
+    {k:"num", u:"cartons", ctx:"Il faut 28 paquets de café. Le fournisseur les vend par cartons de 12.", q:"Combien de cartons commandes-tu ?", a:3, e:"2 cartons = 24 paquets, ce n'est pas assez. Il faut 3 cartons (36 paquets)."},
+    {k:"num", u:"bouteilles", ctx:"Cadencier du jus de pomme<br>Semaine 1 : 18 vendues · Semaine 2 : 22 · Semaine 3 : 20", q:"Combien de bouteilles le magasin vend-il en moyenne par semaine ?", a:20, e:"(18 + 22 + 20) ÷ 3 = 20 bouteilles par semaine."},
+    {k:"qcm", q:"La commande est urgente et doit partir avant 11 h. Quel mode de transmission choisis-tu ?", o:["Un courrier postal","Le logiciel de commande ou un appel, confirmé par écrit","Attendre le passage du commercial le mois prochain"], a:1, e:"En urgence, on utilise le mode le plus rapide, et on garde une trace écrite."},
+    {k:"qcm", q:"Avant d'envoyer une commande préparée, il faut…", o:["la faire valider par le responsable","l'envoyer à plusieurs fournisseurs","la mettre en rayon"], a:0, e:"La commande engage le magasin : elle est validée par le responsable avant d'être transmise."}
+  ]},
+  { id:"1.1-c", icon:"✉️", title:"Passer la commande par courriel", kind:"Rédaction", min:5, redac:{
+    situation:"Ta responsable a validé la commande de la semaine. Rédige le courriel de commande au fournisseur Distrimarché (commandes@distrimarche.fr). La livraison est souhaitée mardi prochain.",
+    infos:["Réf. 3120, café moulu 250 g : 3 cartons de 12","Réf. 4410, jus de pomme 1 L : 2 cartons de 6","Client n°PL-882, supérette Le Panier de Léo"],
+    method:["Un objet clair : « Commande du … »","La formule d'appel","Le numéro client du magasin","La liste des produits : référence, désignation, quantité","La date de livraison souhaitée","La formule de politesse et la signature"],
+    amorces:["Objet : Commande","Madame, Monsieur,","Veuillez trouver ci-dessous notre commande :","Nous souhaiterions être livrés le","Merci de bien vouloir nous confirmer la bonne réception de cette commande.","Cordialement,"],
+    checks:["J'ai écrit un objet clair","J'ai indiqué le numéro client","Chaque produit a sa référence et sa quantité","J'ai donné la date de livraison souhaitée","J'ai vouvoyé et signé"],
+    modele:"Objet : Commande du 7 octobre, client n°PL-882\n\nMadame, Monsieur,\n\nVeuillez trouver ci-dessous notre commande :\n- réf. 3120, café moulu 250 g : 3 cartons de 12 ;\n- réf. 4410, jus de pomme 1 L : 2 cartons de 6.\n\nNous souhaiterions être livrés mardi 13 octobre. Merci de bien vouloir nous confirmer la bonne réception de cette commande.\n\nCordialement,\nInès Martin, Le Panier de Léo"
+  }}
+ ]},
+ "1.3":{ place:"La réserve du « Panier de Léo »", list:[
+  { id:"1.3-a", icon:"🏗️", title:"Ranger sans danger", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"Tu ranges des packs d'eau et des paquets de chips. Où places-tu les packs d'eau ?", o:["En haut de l'étagère","En bas, au niveau du sol","Au milieu, à hauteur des yeux"], a:1, e:"Les produits lourds se rangent en bas : moins d'effort, moins de risque de chute."},
+    {k:"qcm", q:"La règle « premier entré, premier sorti » veut dire que…", o:["on vend d'abord les produits arrivés les premiers","on vend d'abord les produits les plus chers","on range les nouveaux produits devant"], a:0, e:"Les anciens produits passent devant : c'est la rotation des stocks, elle évite les produits périmés."},
+    {k:"qcm", q:"Pour déplacer une palette de 400 kg, tu utilises…", o:["tes bras, avec un collègue","un transpalette","un chariot de courses"], a:1, e:"Le transpalette manuel permet de déplacer une palette sans porter la charge."},
+    {k:"qcm", q:"L'adresse « B-04-2 » dans la réserve signifie…", o:["allée B, rayonnage 4, niveau 2","bâtiment B, 4 cartons, 2 produits","bon n°B, livré le 4 février"], a:0, e:"L'adressage permet de retrouver chaque produit rapidement : allée, rayonnage, niveau."},
+    {k:"qcm", q:"Où ranges-tu les bidons d'eau de Javel ?", o:["À côté des produits alimentaires","Dans une zone séparée, réservée aux produits dangereux","Sur l'étagère du haut, hors de portée"], a:1, e:"Les produits dangereux ne sont jamais stockés avec les aliments."},
+    {k:"qcm", q:"Une allée de circulation de la réserve est encombrée par des cartons vides. Que fais-tu ?", o:["Je les laisse, quelqu'un s'en occupera","Je les aplatis et les évacue tout de suite au tri","Je les empile dans un coin de l'allée pour les jeter en fin de journée"], a:1, e:"Les allées doivent rester libres : c'est une règle de sécurité."}
+  ]},
+  { id:"1.3-b", icon:"♻️", title:"Le grand tri de la réserve", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"Des cartons vides, aplatis", q:"Où vont-ils ?", o:DECHETS, a:0, e:"Le carton se recycle : on l'aplatit pour gagner de la place."},
+    {k:"tri", ctx:"Le film plastique qui entourait une palette", q:"Où va-t-il ?", o:DECHETS, a:1, e:"Le film étirable se recycle avec les plastiques."},
+    {k:"tri", ctx:"Une palette en bois consignée", q:"Où va-t-elle ?", o:DECHETS, a:2, e:"Les palettes consignées sont rendues au fournisseur ou au transporteur."},
+    {k:"tri", ctx:"Un aérosol de désodorisant percé", q:"Où va-t-il ?", o:DECHETS, a:3, e:"Les aérosols et produits chimiques suivent une collecte spéciale."},
+    {k:"tri", ctx:"Les intercalaires en papier des cartons de vaisselle", q:"Où vont-ils ?", o:DECHETS, a:0, e:"Papier et carton vont dans le même bac."}
+  ]},
+  { id:"1.3-c", icon:"📌", title:"Les consignes de la réserve", kind:"Rédaction", min:5, redac:{
+    situation:"Un nouveau stagiaire arrive lundi. Ta responsable te demande d'écrire les 5 règles les plus importantes pour ranger la réserve, sous forme de consignes courtes, à afficher sur la porte.",
+    infos:["Une consigne = un verbe à l'infinitif + une explication courte","Pense à la sécurité, à la rotation, aux déchets et à la propreté"],
+    method:["Un titre","5 consignes numérotées","Chaque consigne commence par un verbe à l'infinitif","Ajouter pourquoi en quelques mots"],
+    amorces:["Les règles de la réserve","1. Ranger","2. Placer","3. Laisser","4. Trier","5. Nettoyer"],
+    checks:["J'ai écrit un titre","J'ai 5 consignes","Chaque consigne commence par un verbe à l'infinitif","J'ai parlé de la sécurité","J'ai parlé de la rotation des produits"],
+    modele:"Les règles de la réserve\n\n1. Ranger les produits lourds en bas, pour éviter les chutes et le mal de dos.\n2. Placer les produits les plus anciens devant : premier entré, premier sorti.\n3. Laisser les allées de circulation libres.\n4. Trier les déchets : cartons aplatis au bac carton, films au bac plastique.\n5. Nettoyer et remettre en ordre son espace avant de quitter la réserve."
+  }}
+ ]},
+ "1.4":{ place:"Drive « Courses Express »", list:[
+  { id:"1.4-a", icon:"🛒", title:"Les commandes en ligne", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"Le client commande sur le site et vient chercher sa commande au comptoir du magasin.", q:"De quel service s'agit-il ?", o:PREPA, a:0, e:"Click & collect : commander en ligne, retirer en magasin."},
+    {k:"tri", ctx:"Le client commande ses courses alimentaires en ligne et les récupère sans descendre de voiture, sur un créneau horaire.", q:"De quel service s'agit-il ?", o:PREPA, a:1, e:"Le drive est surtout utilisé pour les courses alimentaires."},
+    {k:"tri", ctx:"L'équipier parcourt le magasin avec sa liste pour prélever les produits commandés.", q:"Comment s'appelle cette action ?", o:PREPA, a:2, e:"Le picking, c'est le prélèvement des produits pour préparer une commande."},
+    {k:"tri", ctx:"Le produit commandé en ligne est envoyé au client depuis le stock d'un magasin, et non depuis l'entrepôt.", q:"De quel service s'agit-il ?", o:PREPA, a:3, e:"Ship from store : le magasin sert de petit entrepôt."}
+  ]},
+  { id:"1.4-b", icon:"🧺", title:"Préparer sans erreur", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"Dans quel ordre prélèves-tu les produits d'une commande ?", o:["Les surgelés d'abord","Les produits lourds d'abord, les frais et surgelés en dernier","Dans l'ordre de la liste de commande"], a:1, e:"Les lourds en premier pour ne rien écraser ; le froid en dernier pour respecter la chaîne du froid."},
+    {k:"qcm", q:"Dans quel contenant places-tu les glaces ?", o:["Un sac en papier","Un sac isotherme","Un carton ouvert"], a:1, e:"Le sac isotherme garde le froid jusqu'au retrait de la commande."},
+    {k:"qcm", q:"Le client a commandé 2 packs de lait, il n'en reste qu'un. Que fais-tu ?", o:["Je ne mets rien sans le dire","Je suis la procédure : produit de remplacement proposé ou client prévenu","J'ajoute un autre produit au hasard"], a:1, e:"Le client doit savoir ce qui manque et ce qu'on lui propose."},
+    {k:"qcm", q:"La commande est prête. Que fais-tu avant de la ranger dans la zone de retrait ?", o:["Je vérifie que chaque produit et chaque quantité correspondent au bon de commande","Je la range directement","Je l'ouvre pour la montrer à un collègue"], a:0, e:"La vérification évite les réclamations au moment du retrait."},
+    {k:"qcm", q:"Un client vient chercher un colis. Que vérifies-tu avant de le lui remettre ?", o:["Rien, il connaît son nom","Son identité et son numéro de commande","Seulement la couleur du colis"], a:1, e:"On remet le colis uniquement à la bonne personne : identité et numéro de commande."}
+  ]},
+  { id:"1.4-c", icon:"📱", title:"Prévenir le client d'un produit manquant", kind:"Rédaction", min:5, redac:{
+    situation:"Tu prépares la commande drive n°88412 de Mme Benali, à retirer aujourd'hui à 17 h. Le yaourt nature Bio 4 × 125 g est en rupture. Tu peux proposer à la place le yaourt nature de la marque du magasin, 4 × 125 g, moins cher. Rédige le message envoyé à la cliente.",
+    infos:["Commande n°88412, retrait aujourd'hui à 17 h","Produit manquant : yaourt nature Bio 4 × 125 g","Remplacement possible : yaourt nature marque du magasin, moins cher"],
+    method:["Saluer la cliente par son nom","Rappeler le numéro de la commande","Expliquer le produit manquant","Proposer le remplacement et demander son accord","Rappeler l'heure de retrait","Saluer et signer"],
+    amorces:["Bonjour Madame Benali,","Nous préparons votre commande n°88412.","Malheureusement,","Nous pouvons vous proposer","Merci de nous indiquer si","Courses Express"],
+    checks:["J'ai salué la cliente par son nom","J'ai donné le numéro de commande","J'ai expliqué le problème clairement","J'ai proposé une solution et demandé l'accord","J'ai rappelé l'heure de retrait"],
+    modele:"Bonjour Madame Benali,\n\nNous préparons votre commande n°88412. Malheureusement, le yaourt nature Bio 4 × 125 g est en rupture de stock. Nous pouvons vous proposer à la place le yaourt nature de notre marque, 4 × 125 g, à un prix inférieur. Merci de nous indiquer si ce remplacement vous convient.\n\nVotre commande sera prête à 17 h comme prévu.\n\nBonne journée,\nL'équipe Courses Express"
+  }}
+ ]},
+ "2.1":{ place:"Supérette « Le Panier de Léo », côté rayons", list:[
+  { id:"2.1-a", icon:"🥫", title:"Le réassort du matin", kind:"Calcul et QCM", min:4, steps:[
+    {k:"num", u:"boîtes", ctx:"Rayon conserves de thon<br>Capacité du linéaire : <strong>24</strong> boîtes<br>Restant en rayon : <strong>9</strong> boîtes", q:"Combien de boîtes vas-tu chercher en réserve ?", a:15, e:"24 − 9 = 15 boîtes pour remplir le linéaire."},
+    {k:"qcm", q:"Faire le facing, c'est…", o:["nettoyer le rayon","ramener les produits au bord de l'étagère, étiquette face au client","compter les produits"], a:1, e:"Un rayon bien « facé » paraît plein et donne envie d'acheter."},
+    {k:"qcm", q:"Tu remets en rayon des yaourts. Où places-tu ceux qui ont la date la plus proche ?", o:["Derrière","Devant","Peu importe"], a:1, e:"Date la plus proche devant : c'est la rotation, elle limite le gaspillage."},
+    {k:"qcm", q:"Le niveau des yeux est le meilleur emplacement. On y place souvent…", o:["les produits lourds","les produits que le magasin veut le plus vendre","les produits abîmés"], a:1, e:"C'est le niveau le plus vu par les clients."},
+    {k:"qcm", q:"Pendant le réassort, ton carton bloque l'allée. Que fais-tu ?", o:["Je le laisse, je fais vite","Je le pose sur un chariot le long du rayon et je laisse le passage libre","Je le pose au milieu de l'allée"], a:1, e:"Les clients doivent toujours pouvoir circuler en sécurité."}
+  ]},
+  { id:"2.1-b", icon:"🗓️", title:"DLC ou DDM ?", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"Jambon : « À consommer jusqu'au 12/10 »", q:"Quel type de date ?", o:DATES, a:0, e:"« À consommer jusqu'au » : c'est une DLC. Après la date, le produit est retiré."},
+    {k:"tri", ctx:"Paquet de pâtes : « À consommer de préférence avant fin 03/2027 »", q:"Quel type de date ?", o:DATES, a:1, e:"« De préférence avant » : c'est une DDM. Le produit perd en qualité mais n'est pas dangereux."},
+    {k:"tri", ctx:"Yaourts : « À consommer jusqu'au 08/10 »", q:"Quel type de date ?", o:DATES, a:0, e:"Les produits frais ont une DLC."},
+    {k:"tri", ctx:"Biscuits : « À consommer de préférence avant le 30/11 »", q:"Quel type de date ?", o:DATES, a:1, e:"Les produits secs ont souvent une DDM."},
+    {k:"qcm", q:"Une boîte de conserve est bombée. Que fais-tu ?", o:["Je la vends à prix réduit, elle est juste un peu abîmée","Je la retire de la vente et je préviens mon responsable","Je la retourne pour cacher le défaut"], a:1, e:"Une boîte bombée peut être dangereuse : c'est un produit impropre à la vente."}
+  ]},
+  { id:"2.1-c", icon:"📝", title:"Le point avec la responsable", kind:"Rédaction", min:5, redac:{
+    situation:"Tu as fait le réassort du rayon épicerie. Ta responsable, Mme Garnier, te demande un petit message écrit sur ce qui s'est passé, car elle n'était pas là ce matin.",
+    infos:["Thon au naturel : rupture en réserve, le rayon sera vide ce soir","3 boîtes de petits pois bombées retirées de la vente","2 paquets de jambon à DLC dépassée retirés","Rayon conserves rempli et facé"],
+    method:["Saluer la responsable","Dire ce qui a été fait","Signaler les produits retirés et pourquoi","Signaler la rupture à venir","Proposer une action (commander, prévenir…)","Signer"],
+    amorces:["Bonjour Madame Garnier,","Ce matin, j'ai","J'ai retiré de la vente","Attention :","Je vous propose de","Bonne journée,"],
+    checks:["J'ai salué ma responsable","J'ai dit ce que j'ai fait","J'ai signalé les produits retirés avec la raison","J'ai signalé la rupture","J'ai proposé une action"],
+    modele:"Bonjour Madame Garnier,\n\nCe matin, j'ai rempli et facé le rayon conserves. J'ai retiré de la vente 3 boîtes de petits pois bombées et 2 paquets de jambon dont la DLC était dépassée.\n\nAttention : il n'y a plus de thon au naturel en réserve, le rayon sera vide ce soir. Je vous propose de l'ajouter à la prochaine commande.\n\nBonne journée,\nInès"
+  }}
+ ]},
+ "2.2":{ place:"Boutique de déco « Maison Lumen »", list:[
+  { id:"2.2-a", icon:"🔥", title:"Zones chaudes, zones froides", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"L'entrée du magasin", q:"Zone chaude ou zone froide ?", o:ZONES, a:0, e:"Tous les clients passent par l'entrée : c'est une zone très fréquentée."},
+    {k:"tri", ctx:"Le coin du fond, derrière le dernier rayon", q:"Zone chaude ou zone froide ?", o:ZONES, a:1, e:"Peu de clients y passent : c'est une zone froide."},
+    {k:"tri", ctx:"Les abords des caisses", q:"Zone chaude ou zone froide ?", o:ZONES, a:0, e:"Les clients y attendent : idéal pour les petits achats d'impulsion."},
+    {k:"tri", ctx:"Une tête de gondole dans l'allée principale", q:"Zone chaude ou zone froide ?", o:ZONES, a:0, e:"Les têtes de gondole sont très visibles : on y met les promotions et les nouveautés."},
+    {k:"qcm", q:"Pour attirer les clients vers une zone froide, on peut…", o:["y placer des produits très demandés ou une animation","l'éteindre","la fermer"], a:0, e:"Un produit d'appel ou une animation donne une raison d'y aller."}
+  ]},
+  { id:"2.2-b", icon:"🕯️", title:"Ambiance et promotions", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"La boutique diffuse une odeur de bois et une musique douce. On parle de…", o:["facteurs d'ambiance","démarque","balisage"], a:0, e:"Sons, odeurs, lumière, couleurs, température : ce sont les facteurs d'ambiance."},
+    {k:"qcm", q:"Mettre en scène les produits comme dans un vrai salon, avec un décor, s'appelle…", o:["la théâtralisation","l'inventaire","le facing"], a:0, e:"La théâtralisation aide le client à imaginer le produit chez lui."},
+    {k:"qcm", q:"Un client achète des bougies parfumées près de la caisse sans l'avoir prévu. C'est un achat…", o:["d'impulsion","obligatoire","en gros"], a:0, e:"L'achat d'impulsion est spontané, non prévu."},
+    {k:"qcm", q:"Les soldes peuvent avoir lieu…", o:["quand le magasin le décide","uniquement pendant les périodes fixées par la loi","dès que le magasin a trop de stock"], a:1, e:"Il y a deux périodes de soldes par an, fixées par la réglementation."},
+    {k:"num", u:"€", ctx:"Un vase coûte <strong>40 €</strong>. Il est soldé à <strong>−25 %</strong>.", q:"Quel est son prix soldé ?", a:30, e:"25 % de 40 € = 10 € ; 40 − 10 = 30 €."}
+  ]},
+  { id:"2.2-c", icon:"💡", title:"Une idée d'animation", kind:"Rédaction", min:6, redac:{
+    situation:"La fête des mères approche. Le gérant de « Maison Lumen » demande à chaque équipier une idée d'animation pour le magasin. Présente la tienne en quelques lignes.",
+    infos:["Le magasin vend bougies, vases, coussins, cadres photo","La zone du fond est peu fréquentée","Budget limité : pas de gros travaux"],
+    method:["Donner un nom à l'animation","Dire où elle se passe dans le magasin et pourquoi","Décrire la mise en valeur (produits, décor, facteurs d'ambiance)","Proposer une action pour les clients (atelier, offre, paquet cadeau)","Dire ce que cela apporte au magasin"],
+    amorces:["Mon idée s'appelle","Je propose de l'installer","Pour la décoration,","Les clients pourront","Cette animation permettra"],
+    checks:["J'ai donné un nom à l'animation","J'ai choisi un emplacement et je l'ai justifié","J'ai cité au moins un facteur d'ambiance","J'ai proposé une action pour les clients","J'ai dit ce que cela apporte au magasin"],
+    modele:"Mon idée s'appelle « Le coin des mamans ».\n\nJe propose de l'installer au fond du magasin, pour attirer les clients dans cette zone peu fréquentée. Pour la décoration, une table avec une nappe rose, des bougies parfumées allumées, des fleurs et des cadres photo mis en scène.\n\nLes clients pourront faire faire un paquet cadeau gratuit et écrire une petite carte pour leur maman.\n\nCette animation permettra d'augmenter les ventes de bougies et de cadres, et de faire découvrir tout le magasin."
+  }}
+ ]},
+ "2.3":{ place:"Épicerie fine « Saveurs & Co »", list:[
+  { id:"2.3-a", icon:"🧾", title:"Le bon prix", kind:"Calcul pratique", min:5, steps:[
+    {k:"num", ctx:"Un coffret de thé coûte <strong>25 € HT</strong>. La TVA est de <strong>20 %</strong>.", q:"Quel est son prix TTC ?", a:30, e:"25 × 1,20 = 30 € TTC."},
+    {k:"num", ctx:"Une boîte de biscuits coûte <strong>4 € HT</strong>. Les produits alimentaires ont une TVA de <strong>5,5 %</strong>.", q:"Quel est son prix TTC ?", a:4.22, e:"4 × 1,055 = 4,22 € TTC."},
+    {k:"num", ctx:"Un panier garni est vendu <strong>48 € TTC</strong>, avec une TVA de 20 %.", q:"Quel est son prix HT ?", a:40, e:"48 ÷ 1,20 = 40 € HT. Pour retrouver le HT, on divise."},
+    {k:"num", ctx:"Une théière coûte <strong>45 €</strong>. Le client a une réduction de <strong>20 %</strong>.", q:"Combien paie-t-il ?", a:36, e:"20 % de 45 € = 9 € ; 45 − 9 = 36 €."},
+    {k:"qcm", q:"Qui reçoit finalement l'argent de la TVA ?", o:["Le magasin","L'État","Le fournisseur"], a:1, e:"Le magasin collecte la TVA pour l'État : c'est un impôt payé par le consommateur."}
+  ]},
+  { id:"2.3-b", icon:"🎁", title:"Emballage ou conditionnement ?", kind:"QCM en situation", min:3, steps:[
+    {k:"qcm", q:"Le pot en verre qui contient directement la confiture, c'est…", o:["le conditionnement","l'emballage de transport"], a:0, e:"Le conditionnement est en contact direct avec le produit."},
+    {k:"qcm", q:"Le carton qui contient 12 pots pour la livraison, c'est…", o:["le conditionnement","l'emballage"], a:1, e:"L'emballage protège les produits pendant le transport et le stockage."},
+    {k:"qcm", q:"Quel matériau choisis-tu pour vendre un produit que le client veut voir à travers ?", o:["Le carton","Le verre ou le plastique transparent","Le métal"], a:1, e:"La transparence permet de voir le produit avant l'achat."},
+    {k:"qcm", q:"Tu prépares un panier garni avec du fromage à la coupe. Que dois-tu faire en premier ?", o:["Me laver les mains et nettoyer le plan de travail","Écrire le prix","Choisir le ruban"], a:0, e:"L'hygiène passe toujours en premier quand on manipule des aliments."},
+    {k:"qcm", q:"Sur un panier garni préparé en magasin, l'étiquette doit indiquer…", o:["seulement le nom du magasin","le contenu, le prix et les dates des produits","le nom du vendeur"], a:1, e:"Le client doit connaître ce qu'il achète, son prix et sa conservation."}
+  ]},
+  { id:"2.3-c", icon:"🎀", title:"La fiche paquet cadeau", kind:"Rédaction", min:5, redac:{
+    situation:"À l'approche de Noël, « Saveurs & Co » propose des paquets cadeaux. Rédige une fiche consigne pour expliquer à un nouveau vendeur comment faire un paquet cadeau propre et rapide.",
+    infos:["Matériel : papier, ciseaux, ruban adhésif, bolduc, étiquette prix à retirer","Le paquet doit être joli, solide et sans étiquette de prix"],
+    method:["Un titre","La liste du matériel","Les étapes numérotées, dans l'ordre","Un verbe à l'infinitif au début de chaque étape","Un conseil de finition"],
+    amorces:["Faire un paquet cadeau","Matériel :","1. Retirer","2. Mesurer","3. Plier","Conseil :"],
+    checks:["J'ai écrit un titre","J'ai listé le matériel","Mes étapes sont numérotées et dans l'ordre","J'ai pensé à retirer l'étiquette de prix","J'ai donné un conseil de finition"],
+    modele:"Faire un paquet cadeau\n\nMatériel : papier cadeau, ciseaux, ruban adhésif, bolduc.\n\n1. Retirer l'étiquette de prix du produit.\n2. Mesurer et couper le papier : il doit faire le tour du produit avec un petit débord.\n3. Plier les bords pour avoir des côtés nets.\n4. Fixer avec deux morceaux de ruban adhésif, côté dessous.\n5. Ajouter le bolduc et le friser avec la lame des ciseaux.\n\nConseil : demander au client si le cadeau est pour un adulte ou un enfant pour choisir le papier."
+  }}
+ ]},
+ "2.4":{ place:"Supérette « Le Panier de Léo », côté étiquettes", list:[
+  { id:"2.4-a", icon:"🏷️", title:"L'étiquette prix", kind:"Calcul et QCM", min:4, steps:[
+    {k:"qcm", q:"Sur l'étiquette prix d'un produit vendu au poids ou au volume, il faut obligatoirement…", o:["le prix au kilo ou au litre","le nom du vendeur","la photo du produit"], a:0, e:"Le prix à l'unité de mesure permet au client de comparer les produits."},
+    {k:"num", u:"€/kg", ctx:"Un paquet de café de <strong>250 g</strong> coûte <strong>3 €</strong>.", q:"Quel est son prix au kilo ?", a:12, e:"1 kg = 4 × 250 g, donc 3 × 4 = 12 € le kilo."},
+    {k:"num", u:"€/L", ctx:"Une bouteille de <strong>50 cl</strong> de jus coûte <strong>1,60 €</strong>.", q:"Quel est son prix au litre ?", a:3.2, e:"50 cl = 0,5 L, donc 1,60 × 2 = 3,20 € le litre."},
+    {k:"qcm", q:"Le prix affiché en rayon est 2,49 €, mais la caisse affiche 2,89 €. Que fais-tu ?", o:["Je fais payer le prix de la caisse, c'est le système qui a raison","Je signale l'anomalie à mon responsable pour corriger l'étiquette ou la caisse","Je retire le produit du rayon"], a:1, e:"Un affichage faux est interdit et mécontente le client : on alerte tout de suite."},
+    {k:"qcm", q:"L'étiquette électronique de gondole permet…", o:["de changer les prix à distance, sans erreur","d'empêcher les vols","de compter les clients"], a:0, e:"Les prix sont mis à jour automatiquement depuis le logiciel."}
+  ]},
+  { id:"2.4-b", icon:"🪧", title:"ILV ou PLV ?", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"Un panneau suspendu « Rayon frais » au-dessus de l'allée", q:"ILV ou PLV ?", o:LV, a:0, e:"Il oriente le client dans le magasin : c'est de l'information sur le lieu de vente."},
+    {k:"tri", ctx:"Un présentoir en carton aux couleurs d'une marque de céréales", q:"ILV ou PLV ?", o:LV, a:1, e:"Il fait la publicité d'une marque : c'est de la publicité sur le lieu de vente."},
+    {k:"tri", ctx:"Une affiche « Horaires d'ouverture » à l'entrée", q:"ILV ou PLV ?", o:LV, a:0, e:"C'est une information pratique du magasin."},
+    {k:"tri", ctx:"Un écran qui diffuse le spot télé d'une marque de lessive", q:"ILV ou PLV ?", o:LV, a:1, e:"Il pousse à acheter une marque précise : c'est de la PLV."},
+    {k:"qcm", q:"Le logo « AB » sur un produit signifie que…", o:["il est issu de l'agriculture biologique","il est fabriqué en France","il est en promotion"], a:0, e:"AB = agriculture biologique."}
+  ]},
+  { id:"2.4-c", icon:"⚠️", title:"Signaler des anomalies d'étiquetage", kind:"Rédaction", min:5, redac:{
+    situation:"Pendant ton contrôle du balisage, tu trouves plusieurs anomalies d'affichage. Rédige un message à ta responsable, Mme Garnier, pour les signaler.",
+    infos:["Huile d'olive 1 L : étiquette à 6,99 €, caisse à 7,49 €","Riz long 1 kg : pas d'étiquette prix","Chocolat noir : affiche promotion terminée depuis hier toujours en place"],
+    method:["Saluer la responsable","Dire que tu as contrôlé le balisage","Lister les anomalies : produit + problème","Dire ce que tu as déjà fait (ex : affiche retirée)","Proposer ou demander une action","Signer"],
+    amorces:["Bonjour Madame Garnier,","En contrôlant le balisage du rayon épicerie, j'ai relevé","J'ai déjà","Pourriez-vous","Merci,"],
+    checks:["J'ai cité les 3 anomalies","Pour chacune, j'ai dit le produit et le problème","J'ai dit ce que j'ai déjà fait","J'ai demandé ou proposé une action","J'ai été poli(e) et précis(e)"],
+    modele:"Bonjour Madame Garnier,\n\nEn contrôlant le balisage du rayon épicerie, j'ai relevé trois anomalies :\n- huile d'olive 1 L : l'étiquette indique 6,99 € mais la caisse affiche 7,49 € ;\n- riz long 1 kg : il n'y a pas d'étiquette prix ;\n- chocolat noir : l'affiche de la promotion terminée hier était encore en place.\n\nJ'ai déjà retiré l'affiche du chocolat. Pourriez-vous vérifier le bon prix de l'huile pour que je corrige l'étiquette, et éditer l'étiquette du riz ?\n\nMerci,\nInès"
+  }}
+ ]},
+ "2.5":{ place:"Magasin de vêtements « Fil & Style »", list:[
+  { id:"2.5-a", icon:"🔒", title:"La chasse à la démarque", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"Un pot de confiture tombé et cassé, enregistré dans le logiciel", q:"Démarque connue ou inconnue ?", o:DEMARQUE, a:0, e:"La casse est constatée et enregistrée : c'est de la démarque connue."},
+    {k:"tri", ctx:"À l'inventaire, il manque 6 tee-shirts sans que personne sache pourquoi", q:"Démarque connue ou inconnue ?", o:DEMARQUE, a:1, e:"L'écart est découvert sans explication (vol, erreur…) : démarque inconnue."},
+    {k:"tri", ctx:"Des yaourts périmés retirés et enregistrés", q:"Démarque connue ou inconnue ?", o:DEMARQUE, a:0, e:"Les produits périmés retirés sont connus et enregistrés."},
+    {k:"tri", ctx:"Un vol à l'étalage que personne n'a vu", q:"Démarque connue ou inconnue ?", o:DEMARQUE, a:1, e:"Le vol non constaté fait partie de la démarque inconnue."},
+    {k:"qcm", q:"Pour protéger un blouson en cuir contre le vol, tu poses…", o:["un antivol textile (macaron)","une étiquette promotion","rien"], a:0, e:"Le macaron se retire en caisse ; il déclenche l'alarme s'il passe le portique."},
+    {k:"qcm", q:"Pour limiter le gaspillage des produits à date courte, le magasin peut…", o:["les jeter le plus tôt possible","les vendre à prix réduit ou les donner à une association","les cacher en réserve"], a:1, e:"Prix réduits et dons aux associations limitent le gaspillage."}
+  ]},
+  { id:"2.5-b", icon:"📋", title:"Jour d'inventaire", kind:"Calcul et QCM", min:4, steps:[
+    {k:"qcm", q:"L'inventaire consiste à…", o:["compter tous les produits présents et calculer leur valeur","commander de nouveaux produits","nettoyer le magasin"], a:0, e:"On compare le stock réel (compté) au stock théorique (dans le logiciel)."},
+    {k:"qcm", q:"L'inventaire annuel est…", o:["obligatoire, au moins une fois par an","interdit","facultatif"], a:0, e:"La loi oblige les entreprises à faire un inventaire au moins une fois par an."},
+    {k:"num", u:"pulls", ctx:"Pulls marins<br>Stock dans le logiciel : <strong>50</strong><br>Pulls comptés : <strong>46</strong>", q:"Quel est l'écart (nombre de pulls manquants) ?", a:4, e:"50 − 46 = 4 pulls manquants : c'est de la démarque inconnue."},
+    {k:"num", u:"€", ctx:"Les 4 pulls manquants valent <strong>35 €</strong> chacun.", q:"Quelle est la valeur de la démarque ?", a:140, e:"4 × 35 = 140 € perdus pour le magasin."},
+    {k:"qcm", q:"Pendant le comptage, tu es interrompu(e) au milieu d'une étagère. Que fais-tu ?", o:["Je reprends là où je pense m'être arrêté(e)","Je note où je m'arrête et je recompte l'étagère si j'ai un doute","J'estime le nombre à partir des étagères voisines"], a:1, e:"Un comptage fiable est indispensable : en cas de doute, on recompte."}
+  ]},
+  { id:"2.5-c", icon:"🌱", title:"Trois actions anti-gaspi", kind:"Rédaction", min:5, redac:{
+    situation:"Ton tuteur de PFMP dans une supérette te demande de proposer trois actions pour réduire le gaspillage au rayon frais. Rédige ta proposition.",
+    infos:["Beaucoup de yaourts et de plats cuisinés sont jetés à DLC","Une association d'aide alimentaire est installée dans le quartier","Le rayon est souvent trop rempli le samedi soir"],
+    method:["Une phrase d'introduction","Action 1 : ce qu'on fait et pourquoi","Action 2 : ce qu'on fait et pourquoi","Action 3 : ce qu'on fait et pourquoi","Une phrase de conclusion"],
+    amorces:["Pour réduire le gaspillage au rayon frais, je propose trois actions.","Premièrement,","Deuxièmement,","Enfin,","Ces actions permettraient"],
+    checks:["J'ai écrit une introduction","J'ai proposé trois actions différentes","Chaque action est expliquée","J'ai utilisé les informations de la situation","J'ai écrit une conclusion"],
+    modele:"Pour réduire le gaspillage au rayon frais, je propose trois actions.\n\nPremièrement, repérer chaque matin les produits dont la DLC arrive dans deux jours et les vendre à prix réduit avec une étiquette visible.\n\nDeuxièmement, signer une convention avec l'association du quartier pour lui donner les produits encore consommables.\n\nEnfin, adapter les quantités commandées pour le week-end, car le rayon est trop rempli le samedi soir.\n\nCes actions permettraient de jeter moins, de réduire la démarque et d'aider des personnes du quartier."
+  }}
+ ]},
+ "3.1":{ place:"Magasin d'électroménager « Électro Center »", list:[
+  { id:"3.1-a", icon:"🧰", title:"Prêt(e) pour l'ouverture", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"Avant l'ouverture, tu prends ton poste en caisse. Que vérifies-tu en premier ?", o:["Que les rayons sont bien rangés","Le fond de caisse, les rouleaux de ticket et le terminal de paiement","Le planning de la semaine"], a:1, e:"Tout doit fonctionner avant le premier client."},
+    {k:"qcm", q:"Ta tenue de travail…", o:["dépend de ton humeur","respecte les règles du magasin et donne une bonne image","n'a aucune importance"], a:1, e:"La tenue fait partie de l'image du magasin."},
+    {k:"qcm", q:"Le terminal de paiement ne s'allume pas. Que fais-tu ?", o:["J'attends que ça revienne","Je préviens tout de suite mon responsable, avant l'arrivée des clients","J'accepte seulement les espèces sans rien dire"], a:1, e:"Signaler tôt permet de trouver une solution avant l'ouverture."},
+    {k:"qcm", q:"Le magasin offre à ses salariés une salle de repos et des formations. Cela améliore sa performance…", o:["sociale","économique","technique"], a:0, e:"La performance sociale concerne le bien-être et le développement des salariés."},
+    {k:"qcm", q:"Le chiffre d'affaires du magasin augmente de 10 %. C'est une performance…", o:["sociale","économique","environnementale"], a:1, e:"Ventes, bénéfices : ce sont des indicateurs économiques."}
+  ]},
+  { id:"3.1-b", icon:"📄", title:"Le contrat de travail", kind:"Le bon tri", min:4, steps:[
+    {k:"tri", ctx:"Lina est embauchée sans date de fin.", q:"Quel contrat ?", o:CONTRATS, a:0, e:"Le CDI est un contrat à durée indéterminée."},
+    {k:"tri", ctx:"Théo remplace une salariée en congé maternité pendant 4 mois.", q:"Quel contrat ?", o:CONTRATS, a:1, e:"Le CDD peut servir à remplacer un salarié absent."},
+    {k:"tri", ctx:"Une agence fournit un vendeur au magasin pour deux semaines de forte activité.", q:"Quel contrat ?", o:CONTRATS, a:2, e:"En intérim, l'agence emploie le salarié et le met à disposition du magasin."},
+    {k:"vf", q:"Dans un contrat de travail, seul le salarié a des obligations.", a:false, e:"L'employeur doit fournir le travail, payer le salaire et respecter la loi."},
+    {k:"vf", q:"Quand c'est le salarié qui décide de quitter son CDI, on parle de démission.", a:true, e:"Quand c'est l'employeur qui met fin au contrat, on parle de licenciement."},
+    {k:"vf", q:"Le règlement intérieur peut interdire d'embaucher quelqu'un à cause de son origine.", a:false, e:"Une clause discriminatoire est interdite dans un règlement intérieur."}
+  ]},
+  { id:"3.1-c", icon:"✅", title:"La liste d'ouverture", kind:"Rédaction", min:5, redac:{
+    situation:"Le responsable d'« Électro Center » veut une liste des tâches à faire chaque matin avant l'ouverture du magasin (à 9 h 30), pour les nouveaux vendeurs. Rédige-la.",
+    infos:["Le personnel arrive à 9 h","Le magasin a 2 caisses, des tablettes vendeurs et une borne de commande","Les rayons doivent être propres et rangés"],
+    method:["Un titre","Les tâches dans l'ordre où on les fait","Un verbe à l'infinitif au début de chaque tâche","Penser à soi (tenue), au matériel et au magasin","Terminer par la dernière vérification avant d'ouvrir"],
+    amorces:["Avant l'ouverture (9 h – 9 h 30)","1. Mettre","2. Vérifier","3. Allumer","4. Contrôler","Dernière vérification :"],
+    checks:["J'ai écrit un titre","Mes tâches sont dans un ordre logique","Chaque tâche commence par un verbe","J'ai pensé à la tenue, au matériel et au magasin","J'ai écrit au moins 5 tâches"],
+    modele:"Avant l'ouverture (9 h – 9 h 30)\n\n1. Mettre sa tenue professionnelle et son badge.\n2. Vérifier le fond de caisse et les rouleaux de ticket des 2 caisses.\n3. Allumer et tester les terminaux de paiement, les tablettes et la borne de commande.\n4. Contrôler la propreté et le rangement des rayons.\n5. Vérifier les étiquettes prix des promotions du jour.\n6. Lire les consignes du responsable sur le tableau.\n\nDernière vérification : allumer les lumières et la musique, puis ouvrir les portes à 9 h 30."
+  }}
+ ]},
+ "3.2":{ place:"Boutique de prêt-à-porter « Fil & Style »", list:[
+  { id:"3.2-a", icon:"😊", title:"Bien accueillir", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"Un client entre pendant que tu es au téléphone avec un autre client. Que fais-tu ?", o:["Je termine mon appel avant de le regarder","Je lui fais un signe de tête et un sourire pour lui montrer que je l'ai vu","J'écourte l'appel en disant au client au téléphone de rappeler plus tard"], a:1, e:"Un signe suffit : le client sait qu'il sera pris en charge."},
+    {k:"qcm", q:"Quelle phrase d'accueil est la plus adaptée ?", o:["« Ouais, c'est pour quoi ? »","« Bonjour Madame, je suis à votre disposition si vous avez besoin. »","« Vous cherchez quoi ? »"], a:1, e:"Formule de politesse, vouvoiement, disponibilité sans pression."},
+    {k:"qcm", q:"Les bras croisés et le regard fuyant donnent au client une impression…", o:["d'accueil chaleureux","de fermeture ou de désintérêt","de professionnalisme"], a:1, e:"Le corps parle autant que les mots."},
+    {k:"qcm", q:"Une maman entre avec une poussette et un bébé qui pleure. Que fais-tu ?", o:["Je lui tiens la porte et lui propose de l'aide avec le sourire","Je lui demande de sortir","Je fais semblant de ne pas la voir"], a:0, e:"S'adapter au client, c'est aussi le mettre à l'aise."},
+    {k:"qcm", q:"Les premières secondes d'un contact avec le client sont importantes car…", o:["elles donnent la première impression","elles sont chronométrées","elles ne comptent pas"], a:0, e:"On n'a jamais une deuxième chance de faire une bonne première impression."}
+  ]},
+  { id:"3.2-b", icon:"🗣️", title:"Les trois communications", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"« Bonjour Monsieur, bienvenue chez Fil & Style. »", q:"Quel type de communication ?", o:COMVERB, a:0, e:"Ce sont les mots choisis : la communication verbale."},
+    {k:"tri", ctx:"Un ton de voix calme et souriant", q:"Quel type de communication ?", o:COMVERB, a:1, e:"Le ton, le volume, le débit : c'est le paraverbal."},
+    {k:"tri", ctx:"Un sourire et un regard vers le client", q:"Quel type de communication ?", o:COMVERB, a:2, e:"Les gestes, la posture, le regard : c'est le non-verbal."},
+    {k:"tri", ctx:"Parler trop vite et trop fort", q:"Quel type de communication ?", o:COMVERB, a:1, e:"Le débit et le volume relèvent du paraverbal."},
+    {k:"tri", ctx:"Se tenir droit(e), les mains visibles", q:"Quel type de communication ?", o:COMVERB, a:2, e:"La posture fait partie du non-verbal."}
+  ]},
+  { id:"3.2-c", icon:"💬", title:"Trouver les bons mots", kind:"Rédaction", min:5, redac:{
+    situation:"Écris ce que tu dis pour accueillir le client dans chacune des 4 situations ci-dessous (une à deux phrases par situation).",
+    infos:["1. Une cliente entre à 9 h 30, le magasin vient d'ouvrir","2. Un client attend depuis plusieurs minutes car tu étais occupé(e)","3. Un client revient : tu l'as conseillé hier","4. Le téléphone sonne : tu décroches"],
+    method:["Commencer par une formule de politesse","Vouvoyer","Montrer que tu es disponible","Adapter la phrase à la situation (s'excuser, reconnaître le client, présenter le magasin au téléphone)"],
+    amorces:["1. Bonjour Madame,","2. Excusez-moi de vous avoir fait attendre,","3. Bonjour Monsieur, je suis content(e) de vous revoir.","4. Fil & Style, bonjour,"],
+    checks:["J'ai répondu aux 4 situations","Chaque réponse commence par une formule de politesse","J'ai vouvoyé","Je me suis excusé(e) dans la situation 2","Au téléphone, j'ai dit le nom du magasin et le mien"],
+    modele:"1. Bonjour Madame, bienvenue chez Fil & Style. N'hésitez pas à m'appeler si vous avez besoin d'un conseil.\n\n2. Excusez-moi de vous avoir fait attendre, Monsieur. Je suis à vous : que puis-je faire pour vous ?\n\n3. Bonjour Monsieur, je suis content(e) de vous revoir. Le pantalon d'hier vous convient-il ?\n\n4. Fil & Style, bonjour, Inès à l'appareil. Que puis-je faire pour vous ?"
+  }}
+ ]},
+ "3.3":{ place:"Magasin de sport « Le Vestiaire »", list:[
+  { id:"3.3-a", icon:"🎯", title:"SONCASE", kind:"Le bon tri", min:4, steps:[
+    {k:"tri", ctx:"« Je veux un casque solide, je fais du vélo en ville. »", q:"Quel mobile d'achat ?", o:SONCASE, a:0, e:"Le client cherche à être protégé : Sécurité."},
+    {k:"tri", ctx:"« Je veux le dernier modèle, celui qui vient de sortir. »", q:"Quel mobile d'achat ?", o:SONCASE, a:2, e:"Le client veut être le premier à avoir la nouveauté."},
+    {k:"tri", ctx:"« Je veux des chaussures avec un bon amorti, j'ai mal aux genoux. »", q:"Quel mobile d'achat ?", o:SONCASE, a:3, e:"Le client cherche le bien-être : Confort."},
+    {k:"tri", ctx:"« Je n'ai pas un gros budget, qu'est-ce que vous avez de moins cher ? »", q:"Quel mobile d'achat ?", o:SONCASE, a:4, e:"Le prix est sa priorité : Argent."},
+    {k:"tri", ctx:"« Je veux un maillot que personne d'autre n'a dans mon club. »", q:"Quel mobile d'achat ?", o:SONCASE, a:1, e:"Se distinguer, être fier : Orgueil."},
+    {k:"tri", ctx:"« Ces chaussures sont fabriquées avec des matières recyclées ? »", q:"Quel mobile d'achat ?", o:SONCASE, a:6, e:"Le client fait attention à la planète : Environnement."}
+  ]},
+  { id:"3.3-b", icon:"🚲", title:"Conseiller le bon produit", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"Quelle est une question ouverte ?", o:["« Vous cherchez des chaussures ? »","« Pour quelle activité allez-vous les utiliser ? »","« Plutôt noires ou blanches ? »"], a:1, e:"La question ouverte laisse le client s'exprimer : elle commence souvent par quel, comment, pourquoi."},
+    {k:"qcm", q:"« Plutôt pour courir sur route ou en forêt ? » est une question…", o:["ouverte","fermée","alternative"], a:2, e:"La question alternative propose un choix entre deux réponses."},
+    {k:"qcm", q:"Dans un argument CAP, le C, le A et le P veulent dire…", o:["Client, Achat, Prix","Caractéristique, Avantage, Preuve","Conseil, Accueil, Politesse"], a:1, e:"Une caractéristique du produit, l'avantage pour le client, une preuve pour le convaincre."},
+    {k:"qcm", q:"« Cette veste est imperméable (C), vous resterez au sec sous la pluie (A)… » Quelle preuve ajoutes-tu ?", o:["« Elle est jolie. »","« Regardez : je verse un peu d'eau, elle glisse sans traverser. »","« Elle est en promotion. »"], a:1, e:"La démonstration est la preuve la plus convaincante."},
+    {k:"qcm", q:"Le client achète un vélo. Quel service associé peux-tu lui proposer ?", o:["Le montage et le premier réglage offerts","Un casque, pour sa sécurité","Une remise s'il paie en espèces"], a:0, e:"Montage, livraison, garantie, entretien : ce sont des services. Le casque est un produit complémentaire, pas un service."},
+    {k:"qcm", q:"Le client a choisi ses chaussures de course. Quelle vente additionnelle proposes-tu ?", o:["Des chaussettes techniques","Une deuxième paire identique","Un abonnement à une salle de sport"], a:0, e:"Le produit complémentaire doit être utile avec l'achat principal."}
+  ]},
+  { id:"3.3-c", icon:"📲", title:"Le SMS colis disponible", kind:"Rédaction", min:5, redac:{
+    situation:"Le colis de M. Laurent est arrivé au magasin. Écris le SMS pour le prévenir, en n'oubliant aucune information (méthode QQOQCCP : qui, quoi, où, quand, comment, combien, pourquoi).",
+    infos:["Client : M. Laurent, commande n°55012 (raquette de badminton)","Retrait au comptoir « Retrait colis », au fond du magasin","Disponible jusqu'au 20 octobre, du lundi au samedi, 9 h 30 – 19 h","Se munir d'une pièce d'identité et du numéro de commande","Déjà payé en ligne"],
+    method:["Qui : saluer le client par son nom","Quoi : la commande et son numéro","Où : le lieu de retrait","Quand : les horaires et la date limite","Comment : ce qu'il doit apporter","Combien : préciser que c'est déjà payé","Rester court et signer du nom du magasin"],
+    amorces:["Bonjour M. Laurent,","votre commande n°55012 est disponible","au comptoir Retrait colis","jusqu'au 20 octobre","Pensez à apporter","Le Vestiaire"],
+    checks:["J'ai salué le client par son nom","J'ai donné le numéro de commande","J'ai indiqué le lieu et les horaires","J'ai donné la date limite","J'ai dit ce qu'il faut apporter","Mon SMS est court et sans faute"],
+    modele:"Bonjour M. Laurent, votre commande n°55012 (raquette de badminton) est disponible au comptoir Retrait colis du magasin Le Vestiaire, jusqu'au 20 octobre, du lundi au samedi de 9 h 30 à 19 h. Elle est déjà réglée. Pensez à apporter une pièce d'identité et votre numéro de commande. À bientôt ! Le Vestiaire"
+  }}
+ ]},
+ "3.5":{ place:"Magasin de bricolage « Brico Plus »", list:[
+  { id:"3.5-a", icon:"🧩", title:"Quel type de réclamation ?", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"« La perceuse que j'ai achetée ne fonctionne pas. »", q:"Quel type de réclamation ?", o:RECLA, a:0, e:"Le problème vient du produit lui-même."},
+    {k:"tri", ctx:"« Le vendeur m'a parlé de façon désagréable. »", q:"Quel type de réclamation ?", o:RECLA, a:1, e:"Le problème vient du comportement d'un membre du personnel."},
+    {k:"tri", ctx:"« Il n'y a jamais de place sur votre parking et l'attente en caisse est trop longue. »", q:"Quel type de réclamation ?", o:RECLA, a:2, e:"Le problème vient de l'organisation du magasin."},
+    {k:"tri", ctx:"« Le pot de peinture était ouvert dans le carton. »", q:"Quel type de réclamation ?", o:RECLA, a:0, e:"Le produit est abîmé : réclamation sur le produit."},
+    {k:"tri", ctx:"« Le rayon salle de bains n'est plus éclairé. »", q:"Quel type de réclamation ?", o:RECLA, a:2, e:"C'est l'espace de vente qui pose problème."}
+  ]},
+  { id:"3.5-b", icon:"🧘", title:"Garder son calme", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"Un client arrive très énervé. Quelle est ta première réaction ?", o:["Lui couper la parole pour expliquer","L'écouter jusqu'au bout sans l'interrompre","Lui dire de se calmer"], a:1, e:"Écouter sans interrompre fait souvent baisser la tension."},
+    {k:"qcm", q:"Après l'avoir écouté, tu dis : « Si je comprends bien, votre perceuse s'arrête au bout de quelques secondes ? » C'est…", o:["une reformulation","une vente additionnelle","une prise de congé"], a:0, e:"Reformuler montre au client qu'il a été compris et évite les malentendus."},
+    {k:"qcm", q:"La perceuse a 3 mois et le client a son ticket. Quelle solution peux-tu proposer ?", o:["Lui dire de contacter directement le fabricant","Un échange ou une prise en charge au service après-vente, selon la procédure du magasin","Un bon d'achat, sans vérifier le ticket"], a:1, e:"Le produit est sous garantie : on applique la procédure du magasin."},
+    {k:"qcm", q:"Le client demande un remboursement que tu n'as pas le droit d'accorder. Que fais-tu ?", o:["Je refuse sèchement","Je transmets la demande à mon responsable et j'explique au client ce qui va se passer","Je le rembourse quand même"], a:1, e:"On transmet ce qui dépasse ses compétences, sans laisser le client sans réponse."},
+    {k:"qcm", q:"Pour gérer ton stress face à un client agressif, tu peux…", o:["respirer lentement et parler calmement","crier plus fort","partir sans rien dire"], a:0, e:"Une respiration lente et une voix posée aident à garder son calme."}
+  ]},
+  { id:"3.5-c", icon:"✍️", title:"Répondre à une réclamation", kind:"Rédaction", min:6, redac:{
+    situation:"Mme Dubois a écrit au magasin : « J'ai acheté un pot de peinture blanche de 2,5 L samedi. En rentrant, j'ai vu que le pot était ouvert et qu'il avait coulé dans le carton. Je suis très déçue. » Rédige la réponse du magasin par courriel.",
+    infos:["Le magasin propose l'échange du pot ou le remboursement, sur présentation du ticket","Un bon de réduction de 5 € peut être offert pour s'excuser","Accueil du magasin ouvert de 9 h à 19 h"],
+    method:["Remercier la cliente pour son message","S'excuser pour le désagrément","Montrer qu'on a compris le problème (reformuler)","Proposer la solution","Expliquer ce qu'elle doit faire","Formule de politesse et signature"],
+    amorces:["Madame Dubois,","Nous vous remercions pour votre message","Nous sommes désolés","Nous vous proposons","Il vous suffit de","Nous vous prions d'agréer, Madame, nos salutations distinguées."],
+    checks:["J'ai remercié la cliente","Je me suis excusé(e)","J'ai reformulé son problème","J'ai proposé une solution précise","J'ai expliqué ce qu'elle doit faire","J'ai terminé par une formule de politesse"],
+    modele:"Madame Dubois,\n\nNous vous remercions pour votre message et nous sommes désolés que le pot de peinture blanche de 2,5 L acheté samedi soit arrivé ouvert chez vous.\n\nNous vous proposons de l'échanger ou de vous le rembourser, selon votre choix. Il vous suffit de passer à l'accueil du magasin, de 9 h à 19 h, avec votre ticket de caisse. Pour nous excuser, nous vous offrirons également un bon de réduction de 5 €.\n\nNous vous prions d'agréer, Madame, nos salutations distinguées.\n\nLe service client de Brico Plus"
+  }}
+ ]},
+ "T1":{ place:"Enseigne d'électroménager « Électro Center »", list:[
+  { id:"T1-a", icon:"🌐", title:"Physique ou digital ?", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"Le magasin, avec ses vendeurs", q:"Quel canal ?", o:CANAUX, a:0, e:"Le point de vente est le canal physique."},
+    {k:"tri", ctx:"Le site internet marchand", q:"Quel canal ?", o:CANAUX, a:1, e:"Le site est un canal digital."},
+    {k:"tri", ctx:"L'application mobile de l'enseigne", q:"Quel canal ?", o:CANAUX, a:1, e:"L'application est un canal digital."},
+    {k:"tri", ctx:"Le catalogue papier distribué dans les boîtes aux lettres", q:"Quel canal ?", o:CANAUX, a:0, e:"Le catalogue papier est un support physique."},
+    {k:"tri", ctx:"La page Instagram de l'enseigne", q:"Quel canal ?", o:CANAUX, a:1, e:"Les réseaux sociaux sont des canaux digitaux."}
+  ]},
+  { id:"T1-b", icon:"🔀", title:"Le parcours omnicanal", kind:"QCM en situation", min:4, steps:[
+    {k:"qcm", q:"Une enseigne est omnicanale quand…", o:["elle a seulement un magasin","ses canaux sont reliés et le client passe facilement de l'un à l'autre","elle vend uniquement sur internet"], a:1, e:"En omnicanal, le client retrouve la même offre et le même service partout, et peut changer de canal en cours de route."},
+    {k:"qcm", q:"Léa compare des aspirateurs sur le site, puis va les essayer et les acheter en magasin. Son parcours est…", o:["omnicanal","uniquement physique","impossible"], a:0, e:"Elle utilise plusieurs canaux pour un même achat."},
+    {k:"qcm", q:"En magasin, le produit n'est pas en rayon. Le vendeur le commande sur sa tablette pour une livraison à domicile. C'est…", o:["une vente perdue","un exemple d'omnicanal : le magasin s'appuie sur le stock en ligne","une erreur de caisse"], a:1, e:"Grâce aux outils digitaux, le vendeur ne perd pas la vente."},
+    {k:"qcm", q:"Un client a acheté sur le site et veut rendre le produit en magasin. Dans une enseigne omnicanale…", o:["c'est possible","c'est interdit","il doit le renvoyer par la poste"], a:0, e:"Le retour en magasin d'un achat en ligne est un service omnicanal courant."},
+    {k:"qcm", q:"Pourquoi les enseignes développent-elles l'omnicanal ?", o:["Pour suivre les habitudes des clients qui utilisent plusieurs canaux","Pour fermer les magasins","Pour augmenter les prix"], a:0, e:"Les clients s'informent, achètent et se font livrer par différents canaux."}
+  ]},
+  { id:"T1-c", icon:"💬", title:"Répondre sur les réseaux sociaux", kind:"Rédaction", min:5, redac:{
+    situation:"Sur la page Facebook d'« Électro Center », une cliente, Sarah, écrit : « Bonjour, est-ce que le robot pâtissier Kitchen Pro est disponible dans votre magasin de Saint-Chamond ? Je voudrais l'acheter samedi. » Rédige la réponse publique de l'enseigne.",
+    infos:["Le robot est en stock à Saint-Chamond (3 exemplaires)","Il peut être réservé gratuitement en ligne et retiré en 2 heures","Le magasin est ouvert le samedi de 9 h à 19 h"],
+    method:["Saluer la cliente par son prénom","Répondre clairement à sa question","Proposer un service pratique (réservation, retrait)","Donner les horaires utiles","Rester court, poli et positif","Signer au nom de l'équipe"],
+    amorces:["Bonjour Sarah,","Bonne nouvelle :","Vous pouvez le réserver gratuitement","Le magasin est ouvert le samedi","À samedi !"],
+    checks:["J'ai salué la cliente","J'ai répondu à sa question","J'ai proposé la réservation en ligne","J'ai donné les horaires","Mon message est court et sans faute"],
+    modele:"Bonjour Sarah,\n\nBonne nouvelle : le robot pâtissier Kitchen Pro est disponible dans notre magasin de Saint-Chamond. Pour être sûre de l'avoir samedi, vous pouvez le réserver gratuitement sur notre site : il sera prêt en 2 heures. Le magasin est ouvert le samedi de 9 h à 19 h.\n\nÀ samedi !\nL'équipe Électro Center"
+  }}
+ ]},
+ "T2":{ place:"Parfumerie « Belle Allure »", list:[
+  { id:"T2-a", icon:"💎", title:"Fidéliser ou mesurer ?", kind:"Le bon tri", min:3, steps:[
+    {k:"tri", ctx:"Une carte qui cumule des points à chaque achat", q:"À quoi sert cet outil ?", o:FIDE, a:0, e:"La carte donne envie de revenir pour profiter des avantages."},
+    {k:"tri", ctx:"Un questionnaire envoyé par mail après l'achat", q:"À quoi sert cet outil ?", o:FIDE, a:1, e:"Il mesure ce que le client a pensé de son achat."},
+    {k:"tri", ctx:"Une offre envoyée pour l'anniversaire du client", q:"À quoi sert cet outil ?", o:FIDE, a:0, e:"Une attention personnalisée renforce le lien avec le client."},
+    {k:"tri", ctx:"Une borne avec des smileys à la sortie du magasin", q:"À quoi sert cet outil ?", o:FIDE, a:1, e:"Elle mesure la satisfaction en un clic."},
+    {k:"tri", ctx:"Une vente privée réservée aux membres du club", q:"À quoi sert cet outil ?", o:FIDE, a:0, e:"Réserver des avantages aux clients fidèles les valorise."}
+  ]},
+  { id:"T2-b", icon:"📈", title:"Pourquoi fidéliser ?", kind:"QCM et calcul", min:4, steps:[
+    {k:"qcm", q:"Pour une enseigne, garder un client existant coûte en général…", o:["plus cher que d'en trouver un nouveau","moins cher que d'en trouver un nouveau"], a:1, e:"Attirer un nouveau client demande de la publicité et des promotions ; un client fidèle revient de lui-même."},
+    {k:"qcm", q:"Un client satisfait est-il forcément fidèle ?", o:["Oui, toujours","Non, il peut être satisfait et aller ailleurs la prochaine fois"], a:1, e:"La satisfaction est nécessaire, mais il faut aussi lui donner des raisons de revenir."},
+    {k:"num", u:"%", ctx:"Sur 200 clients venus en septembre, 120 étaient déjà venus au moins une fois.", q:"Quel pourcentage de clients sont des clients qui reviennent ?", a:60, e:"120 ÷ 200 × 100 = 60 %."},
+    {k:"qcm", q:"Une réclamation bien traitée…", o:["fait toujours perdre le client","peut rendre le client encore plus fidèle","n'a aucun effet"], a:1, e:"Un client dont le problème est bien réglé garde souvent une très bonne image du magasin."},
+    {k:"qcm", q:"Pour envoyer des offres par mail à un client, il faut…", o:["son accord","rien du tout","l'accord de son voisin"], a:0, e:"Le RGPD impose l'accord du client pour utiliser ses données à des fins commerciales."}
+  ]},
+  { id:"T2-c", icon:"💌", title:"Le message de remerciement", kind:"Rédaction", min:5, redac:{
+    situation:"Mme Nguyen vient de créer sa carte de fidélité chez « Belle Allure » en achetant un parfum. Rédige le mail de bienvenue que la parfumerie lui envoie.",
+    infos:["1 € dépensé = 1 point ; 100 points = un bon de 10 €","Pour l'ouverture de sa carte : un échantillon offert à son prochain passage","Elle a accepté de recevoir les offres par mail"],
+    method:["Un objet accrocheur","Remercier et souhaiter la bienvenue","Expliquer simplement le fonctionnement de la carte","Annoncer le cadeau de bienvenue","Donner envie de revenir","Signer au nom de la boutique"],
+    amorces:["Objet : Bienvenue","Chère Madame Nguyen,","Merci pour votre confiance","Avec votre carte,","Pour fêter votre arrivée,","À très bientôt chez Belle Allure,"],
+    checks:["J'ai écrit un objet","J'ai remercié la cliente","J'ai expliqué le fonctionnement des points","J'ai annoncé le cadeau de bienvenue","Le ton est chaleureux et professionnel"],
+    modele:"Objet : Bienvenue dans le club Belle Allure !\n\nChère Madame Nguyen,\n\nMerci pour votre confiance et bienvenue dans le club Belle Allure. Avec votre carte, chaque euro dépensé vous rapporte un point, et 100 points vous donnent un bon d'achat de 10 €.\n\nPour fêter votre arrivée, un échantillon de parfum vous attend lors de votre prochain passage en boutique.\n\nÀ très bientôt chez Belle Allure,\nL'équipe de la boutique"
+  }}
+ ]},
+ "T4":{ place:"Le lycée pro, en classe de 2nde MRC", list:[
+  { id:"T4-a", icon:"⚖️", title:"Premiers pas en économie-droit", kind:"Vrai ou faux chronométré", min:3, steps:[
+    {k:"vf", q:"Pour un achat sur internet, le consommateur dispose en général de 14 jours pour changer d'avis.", a:true, e:"C'est le droit de rétractation pour les achats à distance."},
+    {k:"vf", q:"Le droit de rétractation de 14 jours s'applique aussi à tous les achats en magasin.", a:false, e:"En magasin, l'échange ou le remboursement dépend de la politique commerciale du magasin."},
+    {k:"vf", q:"Un contrat de vente peut exister sans écrit, par exemple quand on achète du pain.", a:true, e:"Dès que le vendeur et l'acheteur sont d'accord sur la chose et le prix, la vente est conclue."},
+    {k:"vf", q:"Les banques sont des agents économiques.", a:true, e:"Ménages, entreprises, administrations, banques : ce sont les agents économiques."},
+    {k:"vf", q:"Un produit neuf acheté en magasin est couvert par une garantie légale de conformité de 2 ans.", a:true, e:"Le vendeur doit réparer ou remplacer un produit qui ne fonctionne pas comme prévu."},
+    {k:"vf", q:"Un mineur de 12 ans peut signer seul un contrat pour acheter une voiture.", a:false, e:"Pour qu'un contrat soit valable, il faut notamment avoir la capacité de s'engager."}
+  ]},
+  { id:"T4-b", icon:"🧠", title:"Justifier sa réponse", kind:"QCM", min:4, steps:[
+    {k:"qcm", q:"Question : « Le magasin a-t-il intérêt à proposer le click & collect ? » Quelle réponse est la mieux justifiée ?", o:["« Oui. »","« Oui, parce que c'est bien. »","« Oui, parce que le client gagne du temps, et le magasin attire des clients qui viennent chercher leur commande et achètent parfois autre chose. »"], a:2, e:"Une bonne justification donne une raison précise, avec ce que cela apporte."},
+    {k:"qcm", q:"Une réponse argumentée se construit souvent ainsi :", o:["une idée, une explication, un exemple","un exemple seulement","trois fois la même idée"], a:0, e:"Idée + explication + exemple : c'est la base d'un paragraphe argumenté."},
+    {k:"qcm", q:"Dans un écrit professionnel, quel mot de liaison introduit une conséquence ?", o:["« donc »","« mais »","« d'abord »"], a:0, e:"« Donc », « c'est pourquoi », « ainsi » introduisent une conséquence."},
+    {k:"qcm", q:"Quel mot de liaison introduit une opposition ?", o:["« ensuite »","« en revanche »","« de plus »"], a:1, e:"« En revanche », « cependant », « mais » marquent une opposition."},
+    {k:"qcm", q:"Avant de répondre à une question de dossier, il faut d'abord…", o:["relire la question et repérer le verbe de consigne (identifier, expliquer, justifier…)","écrire le plus vite possible","recopier le document"], a:0, e:"Le verbe de consigne dit ce qui est attendu : identifier n'est pas expliquer."}
+  ]},
+  { id:"T4-c", icon:"📝", title:"Le paragraphe argumenté", kind:"Rédaction", min:7, redac:{
+    situation:"Question : « Pourquoi une boutique de centre-ville a-t-elle intérêt à être présente sur les réseaux sociaux ? » Réponds en un ou deux paragraphes argumentés (8 à 12 lignes).",
+    infos:["Méthode : idée + explication + exemple","Pense au point de vue du client et à celui de la boutique","Tu peux t'appuyer sur ce que tu as vu en PFMP"],
+    method:["Une phrase d'introduction qui reprend la question","Argument 1 : une idée, une explication, un exemple","Argument 2 : une idée, une explication, un exemple","Des mots de liaison (d'abord, de plus, ainsi, donc)","Une phrase de conclusion"],
+    amorces:["Une boutique de centre-ville a intérêt à être présente sur les réseaux sociaux pour plusieurs raisons.","D'abord,","Par exemple,","De plus,","Ainsi,","En conclusion,"],
+    checks:["J'ai une introduction qui reprend la question","J'ai au moins deux arguments","Chaque argument a une explication et un exemple","J'ai utilisé des mots de liaison","J'ai une conclusion","Mon texte fait au moins 8 lignes"],
+    modele:"Une boutique de centre-ville a intérêt à être présente sur les réseaux sociaux pour plusieurs raisons.\n\nD'abord, les réseaux sociaux lui permettent de se faire connaître gratuitement auprès des habitants. Par exemple, une boutique de vêtements peut publier ses nouveautés chaque semaine : des personnes qui ne passaient jamais devant découvrent le magasin.\n\nDe plus, les réseaux sociaux créent un lien avec les clients. Ils peuvent poser des questions, donner leur avis ou réserver un article. Ainsi, une cliente peut demander si sa taille est disponible avant de se déplacer.\n\nEn conclusion, être présente sur les réseaux sociaux aide une petite boutique à attirer de nouveaux clients et à fidéliser ceux qu'elle a déjà, face aux grandes enseignes et aux sites internet."
+  }}
+ ]}
+});
+
+/* ===================== Données : Supabase ===================== */
+const SUPABASE_URL = "https://ivebbmythfdpmmkbkatw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_tZPhCpUuDoSBIFjvEzoQYQ_NKVqobja";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth:{ persistSession:false } });
+let DB = { students:{} };
+function save(){}
+let S = { user:null, name:"", code:"", teacher:false };
+const QUEUE = []; let flushing = false;
+async function rpc(fn, args){ const { data, error } = await sb.rpc(fn, args); if(error) throw error; return data; }
+function send(fn, args){ QUEUE.push([fn, args]); flush(); }
+async function flush(){
+  if(flushing) return; flushing = true;
+  while(QUEUE.length){
+    const [fn, args] = QUEUE[0];
+    try{ const ok = await rpc(fn, args); QUEUE.shift(); if(ok === false) toast("Ton code n'est plus reconnu : préviens ton enseignante."); }
+    catch(e){ toast("⚠️ Connexion perdue : ton résultat sera envoyé dès que possible."); flushing = false; setTimeout(flush, 15000); return; }
+  }
+  flushing = false;
+}
+window.addEventListener("beforeunload", e => { if(QUEUE.length){ e.preventDefault(); e.returnValue = ""; } });
+function toast(t){ let el = document.getElementById("toastg"); if(!el){ el = document.createElement("div"); el.id = "toastg"; el.className = "toastg"; document.body.appendChild(el); } el.textContent = t; el.classList.add("on"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("on"), 5000); }
+const ALPHA = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function newCode(){ const a = new Uint32Array(6); crypto.getRandomValues(a); return Array.from(a, x => ALPHA[x % ALPHA.length]).join(""); }
+async function fetchAll(table){
+  let out = [], from = 0;
+  while(true){ const { data, error } = await sb.from(table).select("*").order("created_at").range(from, from+999); if(error) throw error; out = out.concat(data); if(data.length < 1000) break; from += 1000; }
+  return out;
+}
+async function loadClass(){
+  const [e, r, d] = await Promise.all([fetchAll("eleves"), fetchAll("resultats"), fetchAll("redactions")]);
+  DB.students = {};
+  e.forEach(x => DB.students[x.id] = { prenom:x.prenom, code:x.code, mrc:x.mrc, attempts:[], redacs:[] });
+  r.forEach(x => { const st = DB.students[x.eleve_id]; if(st) st.attempts.push({ exoId:x.exo_id, comp:x.comp, score:x.score, total:x.total, date:x.created_at }); });
+  d.forEach(x => { const st = DB.students[x.eleve_id]; if(st) st.redacs.push({ id:x.id, exoId:x.exo_id, comp:x.comp, text:x.texte, help:x.aide, status:x.statut, comment:x.commentaire, date:x.created_at }); });
+}
+let timerId = null;
+const app = document.getElementById("app");
+const esc = t => String(t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => Number.isInteger(n) ? n.toLocaleString("fr-FR") : n.toLocaleString("fr-FR",{minimumFractionDigits:2, maximumFractionDigits:2});
+const compById = id => COMPS.find(c => c.id === id);
+function findExo(id){ for(const k in EXOS){ const e = EXOS[k].list.find(x => x.id === id); if(e) return {exo:e, comp:k}; } return null; }
+function student(name){ if(!DB.students[name]) DB.students[name] = {attempts:[], redacs:[]}; return DB.students[name]; }
+function best(name, id){
+  const st = DB.students[name]; if(!st) return null;
+  const a = st.attempts.filter(x => x.exoId === id); if(!a.length) return null;
+  return Math.max(...a.map(x => Math.round(x.score / x.total * 100)));
+}
+function redacOf(name, id){ const st = DB.students[name]; if(!st) return null; const r = st.redacs.filter(x => x.exoId === id); return r.length ? r[r.length-1] : null; }
+function exoDone(name, exo){ return exo.redac ? !!redacOf(name, exo.id) : (best(name, exo.id) || 0) >= 70; }
+function compProgress(name, cid){ const e = EXOS[cid]; if(!e) return null; return { done:e.list.filter(x => exoDone(name, x)).length, total:e.list.length }; }
+function points(name){ const st = DB.students[name]; if(!st) return 0; return st.attempts.reduce((s,a) => s + a.score*10, 0) + st.redacs.length*30; }
+function setC(b){ return '--c:'+BLOCS[b].c+';--soft:'+BLOCS[b].soft; }
+function stopTimer(){ if(timerId){ clearInterval(timerId); timerId = null; } if(GT){ clearInterval(GT); GT = null; } if(GTO){ clearTimeout(GTO); GTO = null; } }
+
+/* ===================== Écrans ===================== */
+function topBar(right){
+  return '<header class="top"><div class="wrap"><div class="brand"><span>🏪</span>La Rue des Compétences</div>'+right+'</div></header>';
+}
+function viewLogin(msg){
+  stopTimer();
+  app.innerHTML = '<div class="login"><div class="card">'+
+    '<h1>🏪 La Rue des Compétences</h1>'+
+    '<p class="muted">Des missions de 5 minutes pour aller plus loin en CAP Équipier polyvalent du commerce.</p>'+
+    '<label class="field"><strong>Ton code personnel</strong><input id="nm" autocomplete="off" autocapitalize="characters" placeholder="Exemple : KP7M3Q" maxlength="12" style="text-transform:uppercase;letter-spacing:.1em"></label>'+
+    '<div class="error" id="err">'+(msg||"")+'</div>'+
+    '<button class="btn big" id="go" style="width:100%">Entrer dans la rue</button>'+
+    '<p style="margin-top:18px"><button class="link" id="tch">Je suis l\'enseignante</button></p>'+
+    '</div></div>';
+  const btn = document.getElementById("go"), err = document.getElementById("err"), inp = document.getElementById("nm");
+  const go = async () => {
+    const v = inp.value.trim().toUpperCase().replace(/\s+/g,"");
+    if(v.length < 4){ err.textContent = "Écris ton code personnel pour entrer."; return; }
+    btn.disabled = true; err.textContent = "";
+    try{
+      const d = await rpc("eleve_connexion", { p_code:v });
+      if(!d){ err.textContent = "Code inconnu. Vérifie-le avec ton enseignante."; btn.disabled = false; return; }
+      DB.students = {};
+      DB.students[d.id] = { prenom:d.prenom, mrc:d.mrc,
+        attempts:(d.resultats||[]).map(r => ({ exoId:r.exo_id, comp:r.comp, score:r.score, total:r.total, date:r.date })),
+        redacs:(d.redactions||[]).map(r => ({ exoId:r.exo_id, comp:r.comp, status:r.statut, comment:r.commentaire, help:r.aide, date:r.date, text:"" })) };
+      S.user = d.id; S.name = d.prenom; S.code = v; S.teacher = false;
+      viewHome();
+    }catch(e){ err.textContent = "Impossible de joindre le serveur. Vérifie la connexion internet."; btn.disabled = false; }
+  };
+  btn.onclick = go;
+  inp.onkeydown = e => { if(e.key === "Enter") go(); };
+  inp.focus();
+  document.getElementById("tch").onclick = viewTeacherLogin;
+}
+function viewTeacherLogin(){
+  app.innerHTML = '<div class="login"><div class="card"><h1>Espace enseignant</h1>'+
+    '<label class="field"><strong>Adresse mail</strong><input id="em" type="email" autocomplete="username"></label>'+
+    '<label class="field"><strong>Mot de passe</strong><input id="pw" type="password" autocomplete="current-password"></label>'+
+    '<div class="error" id="err"></div>'+
+    '<div class="row"><button class="btn" id="ok">Ouvrir le tableau de bord</button><button class="btn ghost" id="bk">Retour</button></div></div></div>';
+  const btn = document.getElementById("ok"), err = document.getElementById("err");
+  const ok = async () => {
+    btn.disabled = true; err.textContent = "";
+    const { error } = await sb.auth.signInWithPassword({ email:document.getElementById("em").value.trim(), password:document.getElementById("pw").value });
+    if(error){ err.textContent = "Adresse ou mot de passe incorrect."; btn.disabled = false; return; }
+    S.teacher = true; viewTeacher();
+  };
+  btn.onclick = ok;
+  document.getElementById("pw").onkeydown = e => { if(e.key === "Enter") ok(); };
+  document.getElementById("bk").onclick = () => viewLogin();
+}
+function userBar(){
+  return topBar('<span class="pill">👤 '+esc(S.name)+'</span><span class="pill">⭐ '+points(S.user)+' pts</span><button class="btn ghost" id="out">Changer d\'élève</button>');
+}
+function bindOut(){ const o = document.getElementById("out"); if(o) o.onclick = () => { if(QUEUE.length) flush(); S.user = null; S.code = ""; S.name = ""; DB.students = {}; viewLogin(); }; }
+
+function viewHome(){
+  stopTimer();
+  let html = userBar()+'<main class="wrap"><h1>Bonjour '+esc(S.name.split(" ")[0])+' !</h1><p class="muted">Choisis une compétence. Chaque point coloré correspond à une mission réussie.</p><div class="street">';
+  const shop = b => {
+    html += '<section class="shop'+(b===4?' tremplin':'')+'" style="'+setC(b)+'"><div class="awning"></div><div class="sign"><h2>'+BLOCS[b].name+'</h2><p>'+BLOCS[b].sub+'</p></div><div class="doors">';
+    COMPS.filter(c => c.b === b).forEach(c => {
+      const p = compProgress(S.user, c.id);
+      if(!p){ html += '<button class="door" disabled><span class="code">'+c.id+'</span><span class="t">'+c.t+'</span><span class="s">Bientôt ouvert</span></button>'; return; }
+      let dots = ''; for(let i=0;i<p.total;i++) dots += '<span class="dot'+(i<p.done?' on':'')+'"></span>';
+      html += '<button class="door'+(p.done===p.total?' full':'')+'" data-c="'+c.id+'"><span class="code">'+c.id+'</span><span class="t">'+c.t+'</span><span class="s"><span class="dots">'+dots+'</span>'+(p.done===p.total?'Compétence complète !':p.done+' / '+p.total+' missions')+'</span></button>';
+    });
+    html += '</div></section>';
+  };
+  [1,2,3].forEach(shop);
+  html += '</div><div class="pavement"></div>';
+  if(student(S.user).mrc){
+    shop(4);
+    html += '<p style="text-align:right"><button class="link" id="mrcoff">Retirer le tremplin de ma rue</button></p>';
+  } else {
+    html += '<div class="invite"><p><strong>Tu veux entrer en 2nde Bac Pro Métiers de la relation client l\'année prochaine ?</strong><br>Ouvre le tremplin : des missions pour prendre de l\'avance.</p><button class="btn violet" id="mrcon">Je prépare ma 2nde MRC</button></div>';
+  }
+  html += '</main>';
+  app.innerHTML = html; bindOut();
+  app.querySelectorAll(".door[data-c]").forEach(d => d.onclick = () => viewComp(d.dataset.c));
+  const on = document.getElementById("mrcon"), off = document.getElementById("mrcoff");
+  if(on) on.onclick = () => { student(S.user).mrc = true; send("eleve_mrc", { p_code:S.code, p_val:true }); viewHome(); };
+  if(off) off.onclick = () => { student(S.user).mrc = false; send("eleve_mrc", { p_code:S.code, p_val:false }); viewHome(); };
+}
+
+function viewComp(cid){
+  stopTimer();
+  const c = compById(cid), E = EXOS[cid];
+  let html = userBar()+'<main class="wrap narrow" style="'+setC(c.b)+'"><button class="btn ghost back" id="bk">← La rue</button>'+
+    '<h1>'+c.id+' · '+c.t+'</h1><p class="muted">📍 '+E.place+'</p>';
+  E.list.forEach(x => {
+    let st;
+    if(x.redac){ const r = redacOf(S.user, x.id); st = !r ? '' : (r.status === "validé" ? '<span class="st tag-ok">✔ Validé</span>' : '<span class="st tag-wait">Envoyé</span>'); }
+    else { const b = best(S.user, x.id); st = b === null ? '' : '<span class="st '+(b>=70?'tag-ok':'tag-wait')+'">'+(b>=70?'✔ ':'')+b+' %</span>'; }
+    html += '<button class="exo" data-x="'+x.id+'"><span class="ic">'+x.icon+'</span><span><span class="t">'+x.title+'</span><br><span class="s">'+(x.game?'<span class="jeu">🎮 JEU</span> ':x.kind+' · ')+'environ '+x.min+' min</span></span>'+st+'</button>';
+    if(x.redac){ const r = redacOf(S.user, x.id); if(r && r.comment) html += '<div class="comment">💬 <strong>Ton enseignante :</strong> '+esc(r.comment)+'</div>'; }
+  });
+  html += '</main>';
+  app.innerHTML = html; bindOut();
+  document.getElementById("bk").onclick = viewHome;
+  app.querySelectorAll(".exo").forEach(b => b.onclick = () => startExo(b.dataset.x));
+}
+
+/* ----- Jeux ----- */
+let G = null;
+function startExo(id){
+  const f = findExo(id); if(!f) return;
+  stopTimer();
+  if(f.exo.game) return GAMES[f.exo.game.type](f.exo, f.comp);
+  if(f.exo.redac){ R = { exo:f.exo, comp:f.comp, phase:1, text:"", checks:[], help:false }; return viewRedac(); }
+  G = { exo:f.exo, comp:f.comp, i:0, score:0, answered:false };
+  viewStep();
+}
+function viewStep(){
+  stopTimer();
+  const c = compById(G.comp), st = G.exo.steps[G.i], n = G.exo.steps.length;
+  let html = userBar()+'<main class="wrap narrow" style="'+setC(c.b)+'"><div class="row" style="justify-content:space-between"><button class="btn ghost back" id="bk">Quitter la mission</button><strong>'+G.exo.icon+' '+G.exo.title+'</strong></div>'+
+    '<div class="muted">Question '+(G.i+1)+' sur '+n+'</div><div class="progress"><div style="width:'+(G.i/n*100)+'%"></div></div><div class="card">';
+  if(st.ctx) html += '<div class="ctx">'+st.ctx+'</div>';
+  if(st.k === "vf") html += '<div class="timer"><div id="tm"></div></div>';
+  html += '<div class="q">'+st.q+'</div>';
+  if(st.k === "qcm" || st.k === "tri"){
+    html += '<div class="opts">'+st.o.map((o,i) => '<button class="opt" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+  } else if(st.k === "vf"){
+    html += '<div class="opts vf"><button class="opt" data-v="1">Vrai</button><button class="opt" data-v="0">Faux</button></div>';
+  } else if(st.k === "num"){
+    html += '<div class="num"><input id="nv" inputmode="decimal" autocomplete="off" aria-label="Ta réponse"><strong>'+(st.u||"€")+'</strong><button class="btn" id="nk">Valider</button></div>';
+  }
+  html += '<div id="fb"></div></div></main>';
+  app.innerHTML = html; bindOut();
+  document.getElementById("bk").onclick = () => viewComp(G.comp);
+  G.answered = false;
+  if(st.k === "qcm" || st.k === "tri") app.querySelectorAll(".opt").forEach(b => b.onclick = () => answer(+b.dataset.i));
+  if(st.k === "vf"){
+    app.querySelectorAll(".opt").forEach(b => b.onclick = () => answer(b.dataset.v === "1"));
+    let left = 100; const bar = document.getElementById("tm");
+    timerId = setInterval(() => { left -= 1; if(bar) bar.style.width = left+"%"; if(left <= 0){ stopTimer(); answer(null); } }, 100);
+  }
+  if(st.k === "num"){
+    const inp = document.getElementById("nv"); inp.focus();
+    const go = () => { const v = parseFloat(inp.value.replace(/\s|€|%/g,"").replace(",", ".")); if(isNaN(v)){ inp.focus(); return; } answer(v); };
+    document.getElementById("nk").onclick = go; inp.onkeydown = e => { if(e.key === "Enter") go(); };
+  }
+}
+function answer(v){
+  if(G.answered) return; G.answered = true; stopTimer();
+  const st = G.exo.steps[G.i]; let ok, goodLabel;
+  if(st.k === "qcm" || st.k === "tri"){
+    ok = v === st.a; goodLabel = st.o[st.a];
+    app.querySelectorAll(".opt").forEach(b => { b.disabled = true; const i = +b.dataset.i; if(i === st.a) b.classList.add("good"); else if(i === v) b.classList.add("bad"); });
+  } else if(st.k === "vf"){
+    ok = v === st.a; goodLabel = st.a ? "Vrai" : "Faux";
+    app.querySelectorAll(".opt").forEach(b => { b.disabled = true; const bv = b.dataset.v === "1"; if(bv === st.a) b.classList.add("good"); else if(v !== null && bv === v) b.classList.add("bad"); });
+  } else {
+    ok = Math.abs(v - st.a) < 0.005; goodLabel = fmt(st.a)+" "+(st.u||"€");
+    document.getElementById("nv").disabled = true; document.getElementById("nk").disabled = true;
+  }
+  if(ok) G.score++;
+  const last = G.i === G.exo.steps.length - 1;
+  const head = ok ? "Bien vu !" : (v === null ? "Temps écoulé ! La bonne réponse : "+goodLabel : "Pas tout à fait. La bonne réponse : "+goodLabel);
+  document.getElementById("fb").innerHTML = '<div class="fb '+(ok?'ok':'ko')+'"><strong>'+(ok?'✔ ':'✘ ')+head+'</strong>'+st.e+'</div>'+
+    '<div style="margin-top:14px;text-align:right"><button class="btn" id="nx">'+(last?'Voir mon résultat':'Question suivante')+'</button></div>';
+  const nx = document.getElementById("nx"); nx.focus();
+  nx.onclick = () => { if(last) finish(); else { G.i++; viewStep(); } };
+}
+function finish(){ viewResult(G.exo, G.comp, G.score, G.exo.steps.length, ''); }
+function viewResult(exo, comp, score, total, details){
+  stopTimer();
+  const pct = Math.round(score/total*100), before = compProgress(S.user, comp);
+  student(S.user).attempts.push({ exoId:exo.id, comp, score, total, date:new Date().toISOString() });
+  send("eleve_resultat", { p_code:S.code, p_exo:exo.id, p_comp:comp, p_score:score, p_total:total });
+  const after = compProgress(S.user, comp), c = compById(comp);
+  const msg = pct === 100 ? "Sans faute, bravo !" : pct >= 70 ? "Mission réussie !" : pct >= 40 ? "Pas mal ! Relis les explications et retente ta chance." : "Courage, rejoue pour progresser.";
+  const badge = (after.done === after.total && before.done < before.total) ? '<div class="badge">🏅 Badge débloqué : compétence '+c.id+' complète</div><br>' : '';
+  app.innerHTML = userBar()+'<main class="wrap narrow" style="'+setC(c.b)+'"><div class="card result"><h2>'+exo.icon+' '+exo.title+'</h2>'+
+    '<div class="score">'+score+' / '+total+'</div><p><strong>'+msg+'</strong></p><p class="muted">+'+(score*10)+' points</p>'+badge+(details||'')+
+    '<div class="row" style="justify-content:center;margin-top:12px"><button class="btn" id="rj">Rejouer</button><button class="btn ghost" id="bk">Retour à la compétence</button></div></div></main>';
+  bindOut();
+  document.getElementById("rj").onclick = () => startExo(exo.id);
+  document.getElementById("bk").onclick = () => viewComp(comp);
+}
+
+/* ----- Rédaction ----- */
+let R = null;
+function viewRedac(){
+  stopTimer();
+  const c = compById(R.comp), d = R.exo.redac;
+  const labels = ["La situation","J'écris","Je vérifie","Je compare"];
+  let html = userBar()+'<main class="wrap" style="'+setC(c.b)+'"><div class="row" style="justify-content:space-between"><button class="btn ghost back" id="bk">Quitter la mission</button><strong>'+R.exo.icon+' '+R.exo.title+'</strong></div>'+
+    '<div class="steps">'+labels.map((l,i) => '<span class="'+(i+1===R.phase?'on':'')+'">'+(i+1)+'. '+l+'</span>').join('')+'</div>';
+  const infos = '<ul class="list">'+d.infos.map(x => '<li>'+x+'</li>').join('')+'</ul>';
+  if(R.phase === 1){
+    html += '<div class="card narrow"><h2>La situation</h2><p>'+d.situation+'</p>'+infos+
+      '<div style="text-align:right"><button class="btn" id="nx">J\'ai compris, j\'écris</button></div></div>';
+  } else if(R.phase === 2){
+    html += '<div class="redac"><div><textarea id="tx" maxlength="6000" placeholder="Écris ton texte ici…">'+esc(R.text)+'</textarea>'+
+      '<div class="row" style="justify-content:space-between;margin-top:10px"><span class="muted" id="cnt"></span><button class="btn" id="nx">J\'ai terminé, je vérifie</button></div></div>'+
+      '<aside class="card method"><h3>📋 La méthode</h3><ol>'+d.method.map(x => '<li>'+x+'</li>').join('')+'</ol>'+
+      (R.help ? '<h3>💡 Des débuts de phrases</h3><p class="hint">Touche une phrase pour l\'ajouter à ton texte.</p><div class="chips">'+d.amorces.map((a,i) => '<button class="chip" data-a="'+i+'">'+esc(a)+'</button>').join('')+'</div>' : '<button class="btn ghost" id="help">💡 Besoin d\'un coup de pouce ?</button>')+
+      '<h3 style="margin-top:16px">Rappel</h3>'+infos+'</aside></div>';
+  } else if(R.phase === 3){
+    html += '<div class="card narrow"><h2>Je vérifie mon texte</h2><p class="muted">Relis ton texte et coche chaque case seulement si c\'est vrai.</p>'+
+      d.checks.map((x,i) => '<label class="check"><input type="checkbox" data-k="'+i+'"'+(R.checks[i]?' checked':'')+'><span>'+x+'</span></label>').join('')+
+      '<div class="paper" style="margin:14px 0">'+esc(R.text)+'</div>'+
+      '<div class="row" style="justify-content:space-between"><button class="btn ghost" id="pv">Corriger mon texte</button><button class="btn" id="nx">Envoyer et voir la réponse modèle</button></div></div>';
+  } else {
+    html += '<div class="card"><h2>Je compare</h2><p>Ton texte est envoyé à ton enseignante. Compare-le avec la réponse modèle : qu\'as-tu oublié ? qu\'as-tu dit autrement ?</p>'+
+      '<div class="compare"><div><h3>Mon texte</h3><div class="paper">'+esc(R.text)+'</div></div><div><h3>La réponse modèle</h3><div class="paper">'+esc(d.modele)+'</div></div></div>'+
+      '<div style="text-align:right;margin-top:16px"><button class="btn" id="nx">Retour à la compétence</button></div></div>';
+  }
+  html += '</main>';
+  app.innerHTML = html; bindOut();
+  document.getElementById("bk").onclick = () => viewComp(R.comp);
+  const nx = document.getElementById("nx");
+  if(R.phase === 1) nx.onclick = () => { R.phase = 2; viewRedac(); };
+  if(R.phase === 2){
+    const tx = document.getElementById("tx"), cnt = document.getElementById("cnt");
+    const upd = () => { R.text = tx.value; const w = tx.value.trim() ? tx.value.trim().split(/\s+/).length : 0; cnt.textContent = w+" mots"; nx.disabled = w < 15; };
+    tx.oninput = upd; upd(); tx.focus();
+    app.querySelectorAll(".chip").forEach(ch => ch.onclick = () => {
+      const a = d.amorces[+ch.dataset.a], s = tx.selectionStart, e = tx.selectionEnd, v = tx.value;
+      const pre = v.slice(0,s), sep = pre && !/\n$/.test(pre) ? "\n" : "";
+      tx.value = pre + sep + a + " " + v.slice(e); const pos = (pre+sep+a+" ").length;
+      tx.focus(); tx.setSelectionRange(pos,pos); upd();
+    });
+    nx.onclick = () => { R.phase = 3; viewRedac(); };
+    const hp = document.getElementById("help"); if(hp) hp.onclick = () => { R.text = tx.value; R.help = true; viewRedac(); };
+  }
+  if(R.phase === 3){
+    const boxes = app.querySelectorAll("input[type=checkbox]");
+    const upd = () => { boxes.forEach(b => R.checks[+b.dataset.k] = b.checked); nx.disabled = !d.checks.every((_,i) => R.checks[i]); };
+    boxes.forEach(b => b.onchange = upd); upd();
+    document.getElementById("pv").onclick = () => { R.phase = 2; viewRedac(); };
+    nx.onclick = () => {
+      student(S.user).redacs.push({ exoId:R.exo.id, comp:R.comp, text:R.text, help:R.help, date:new Date().toISOString(), status:"à lire", comment:"" });
+      send("eleve_redaction", { p_code:S.code, p_exo:R.exo.id, p_comp:R.comp, p_texte:R.text.slice(0,6000), p_aide:!!R.help });
+      R.phase = 4; viewRedac();
+    };
+  }
+  if(R.phase === 4) nx.onclick = () => viewComp(R.comp);
+}
+
+/* ===================== Enseignant ===================== */
+const tBar = () => topBar('<span class="pill">Tableau de bord enseignant</span><button class="btn ghost" id="out2">Se déconnecter</button>');
+function bindT(){ const o = document.getElementById("out2"); if(o) o.onclick = async () => { await sb.auth.signOut(); S.teacher = false; DB.students = {}; viewLogin(); }; }
+async function viewTeacher(){
+  stopTimer();
+  app.innerHTML = tBar()+'<main class="wrap"><h1>Suivi de la classe</h1><p class="muted">Chargement des résultats…</p></main>'; bindT();
+  try{ await loadClass(); }catch(e){ app.innerHTML = tBar()+'<main class="wrap"><div class="card"><p class="error">Impossible de charger les données. Vérifie ta connexion, puis actualise.</p><button class="btn" id="rl">Réessayer</button></div></main>'; bindT(); document.getElementById("rl").onclick = viewTeacher; return; }
+  const ids = Object.keys(DB.students).sort((a,b) => DB.students[a].prenom.localeCompare(DB.students[b].prenom, "fr"));
+  let html = tBar()+'<main class="wrap"><h1>Suivi de la classe</h1>'+
+    '<div class="row" style="margin-bottom:12px"><button class="btn" id="codes">👥 Élèves et codes</button><button class="btn ghost" id="rf">↻ Actualiser</button></div>';
+  if(!ids.length){
+    html += '<div class="card"><p>Aucun élève pour l\'instant. Commence par créer les codes de tes élèves avec le bouton « Élèves et codes ».</p></div>';
+  } else {
+    html += '<div class="legend"><span><span class="cell c-full">3/3</span> compétence complète</span><span><span class="cell c-part">1/3</span> en cours</span><span><span class="cell c-none">0/3</span> pas commencée</span><span>🎯 prépare la 2nde MRC</span></div>'+
+      '<div class="tablewrap"><table class="grid"><thead><tr><th>Élève</th>'+COMPS.map(c => '<th title="'+esc(c.t)+'">'+c.id+'</th>').join('')+'<th>2nde MRC</th><th>Points</th><th>Textes à lire</th></tr></thead><tbody>';
+    ids.forEach(n => {
+      const st = DB.students[n], toRead = st.redacs.filter(r => r.status === "à lire").length;
+      html += '<tr data-n="'+n+'"><td><strong>'+esc(st.prenom)+'</strong></td>'+COMPS.map(c => {
+        if(c.b === 4 && !st.mrc) return '<td><span class="cell c-off">–</span></td>';
+        const p = compProgress(n, c.id); if(!p) return '<td><span class="cell c-off">·</span></td>';
+        const cls = p.done === p.total ? 'c-full' : p.done ? 'c-part' : 'c-none';
+        return '<td><span class="cell '+cls+'">'+p.done+'/'+p.total+'</span></td>';
+      }).join('')+'<td>'+(st.mrc?'🎯':'')+'</td><td>'+points(n)+'</td><td>'+(toRead ? '✉️ '+toRead : '·')+'</td></tr>';
+    });
+    html += '</tbody></table></div><p class="hint" style="margin-top:8px">Clique sur un élève pour voir le détail de ses missions et lire ses textes.</p>';
+  }
+  html += '<p class="hint" style="margin-top:20px">Sur un ordinateur partagé, pense à te déconnecter en partant.</p></main>';
+  app.innerHTML = html; bindT();
+  document.getElementById("codes").onclick = viewCodes;
+  document.getElementById("rf").onclick = viewTeacher;
+  app.querySelectorAll("tr[data-n]").forEach(r => r.onclick = () => viewStudent(r.dataset.n));
+}
+function viewCodes(){
+  const ids = Object.keys(DB.students).sort((a,b) => DB.students[a].prenom.localeCompare(DB.students[b].prenom, "fr"));
+  let html = tBar()+'<main class="wrap"><button class="btn ghost back noprint" id="bk">← Toute la classe</button><h1>Élèves et codes</h1>'+
+    '<div class="card noprint" style="margin-bottom:18px"><h2>Ajouter des élèves</h2><p class="muted">Un élève par ligne : prénom et initiale du nom (par exemple « Léa M. »). Un code personnel est créé pour chacun.</p>'+
+    '<textarea id="np" style="min-height:120px" placeholder="Léa M.\nYanis B."></textarea><div class="error" id="err"></div><button class="btn" id="add">Créer les codes</button></div>';
+  if(ids.length){
+    html += '<div class="row noprint" style="justify-content:space-between;margin-bottom:10px"><p class="muted" style="margin:0">Imprime cette page et découpe les étiquettes pour les distribuer.</p><button class="btn ghost" id="pr">🖨️ Imprimer les codes</button></div>'+
+      '<div class="codes">'+ids.map(n => '<div class="codecard"><strong>'+esc(DB.students[n].prenom)+'</strong><div class="cd">'+esc(DB.students[n].code)+'</div><span class="hint">La Rue des Compétences · ton code personnel</span></div>').join('')+'</div>';
+  }
+  html += '</main>';
+  app.innerHTML = html; bindT();
+  document.getElementById("bk").onclick = viewTeacher;
+  const pr = document.getElementById("pr"); if(pr) pr.onclick = () => window.print();
+  const btn = document.getElementById("add"), err = document.getElementById("err");
+  btn.onclick = async () => {
+    const names = document.getElementById("np").value.split("\n").map(x => x.trim().replace(/\s+/g," ")).filter(x => x.length >= 2).map(x => x.slice(0,40));
+    if(!names.length){ err.textContent = "Écris au moins un prénom."; return; }
+    btn.disabled = true; err.textContent = "";
+    for(let attempt = 0; attempt < 3; attempt++){
+      const { error } = await sb.from("eleves").insert(names.map(p => ({ prenom:p, code:newCode() })));
+      if(!error){ await loadClass(); return viewCodes(); }
+      if(error.code !== "23505"){ err.textContent = "L'enregistrement a échoué. Vérifie ta connexion et réessaie."; btn.disabled = false; return; }
+    }
+    err.textContent = "L'enregistrement a échoué, réessaie."; btn.disabled = false;
+  };
+}
+function viewStudent(n){
+  const st = DB.students[n];
+  let html = tBar()+'<main class="wrap narrow"><button class="btn ghost back" id="bk">← Toute la classe</button><h1>'+esc(st.prenom)+'</h1><p class="muted">Code : <strong>'+esc(st.code)+'</strong> · '+points(n)+' points'+(st.mrc?' · 🎯 prépare la 2nde MRC':'')+'</p>';
+  html += '<div class="card" style="margin-bottom:16px"><h2>Missions et jeux</h2>';
+  if(!st.attempts.length) html += '<p class="muted">Aucune mission jouée.</p>';
+  st.attempts.slice().reverse().forEach(a => {
+    const f = findExo(a.exoId), pct = Math.round(a.score/a.total*100);
+    html += '<div class="att"><span><strong>'+a.comp+'</strong> · '+(f?f.exo.title:esc(a.exoId))+'<br><span class="hint">'+new Date(a.date).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"})+'</span></span><strong class="'+(pct>=70?'tag-ok':'tag-wait')+'">'+a.score+'/'+a.total+' · '+pct+' %</strong></div>';
+  });
+  html += '</div><div class="card" style="margin-bottom:16px"><h2>Textes rédigés</h2>';
+  if(!st.redacs.length) html += '<p class="muted">Aucun texte envoyé.</p>';
+  st.redacs.forEach((r,i) => {
+    const f = findExo(r.exoId);
+    html += '<div class="redbox"><div class="row" style="justify-content:space-between"><strong>'+r.comp+' · '+(f?f.exo.title:esc(r.exoId))+'</strong><span class="'+(r.status==="validé"?'tag-ok':'tag-wait')+'"><strong>'+(r.status==="validé"?'✔ Validé':'À lire')+'</strong></span></div>'+(r.help?'<p class="hint">💡 A utilisé le coup de pouce (débuts de phrases)</p>':'<p class="hint">Rédigé sans coup de pouce</p>')+
+      '<div class="paper" style="margin-top:8px">'+esc(r.text)+'</div>'+
+      '<textarea data-i="'+i+'" maxlength="2000" placeholder="Ton commentaire pour l\'élève (facultatif)">'+esc(r.comment||"")+'</textarea>'+
+      '<div class="row"><button class="btn" data-v="'+i+'">'+(r.status==="validé"?'Enregistrer le commentaire':'Valider le texte')+'</button></div></div>';
+  });
+  html += '</div><div class="card"><h2>Supprimer cet élève</h2><p class="muted">Supprime l\'élève, son code et tous ses résultats. C\'est définitif.</p><button class="btn ghost" id="del" style="color:var(--ko);border-color:var(--ko)">Supprimer '+esc(st.prenom)+'</button></div></main>';
+  app.innerHTML = html; bindT();
+  document.getElementById("bk").onclick = viewTeacher;
+  app.querySelectorAll("button[data-v]").forEach(b => b.onclick = async () => {
+    const i = +b.dataset.v, r = st.redacs[i], com = app.querySelector('textarea[data-i="'+i+'"]').value.trim();
+    b.disabled = true;
+    const { error } = await sb.from("redactions").update({ statut:"validé", commentaire:com }).eq("id", r.id);
+    if(error){ b.disabled = false; toast("L'enregistrement a échoué, réessaie."); return; }
+    r.status = "validé"; r.comment = com; toast("✔ Enregistré"); viewStudent(n);
+  });
+  document.getElementById("del").onclick = async () => {
+    if(!confirm("Supprimer définitivement "+st.prenom+" et tous ses résultats ?")) return;
+    const { error } = await sb.from("eleves").delete().eq("id", n);
+    if(error){ toast("La suppression a échoué, réessaie."); return; }
+    viewTeacher();
+  };
+}
+
+/* ===================== JEUX ===================== */
+let GT = null, GTO = null;
+function stopAll(){ stopTimer(); if(GT){ clearInterval(GT); GT = null; } if(GTO){ clearTimeout(GTO); GTO = null; } }
+const shuffle = a => { const b = a.slice(); for(let i=b.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [b[i],b[j]] = [b[j],b[i]]; } return b; };
+const euro = c => (c/100).toLocaleString("fr-FR",{minimumFractionDigits:2, maximumFractionDigits:2})+" €";
+
+function shell(exo, comp){
+  const c = compById(comp);
+  app.innerHTML = userBar()+'<main class="wrap narrow game" style="'+setC(c.b)+'"><div class="row" style="justify-content:space-between"><button class="btn ghost back" id="bk">Quitter le jeu</button><strong>'+exo.icon+' '+exo.title+'</strong></div><div class="hud" id="hud"></div><div id="gm"></div></main>';
+  bindOut();
+  document.getElementById("bk").onclick = () => { stopAll(); viewComp(comp); };
+  return { gm:document.getElementById("gm"), hud:document.getElementById("hud") };
+}
+function intro(gm, title, rules, go){
+  gm.innerHTML = '<div class="card"><h2>'+title+'</h2>'+rules+'<div style="text-align:right;margin-top:14px"><button class="btn big" id="st">C\'est parti !</button></div></div>';
+  document.getElementById("st").onclick = go;
+}
+
+/* ---------- La caisse rapide ---------- */
+const DENOMS = [5000,2000,1000,500,200,100,50,20,10,5,2,1];
+const dLab = c => c >= 100 ? (c/100)+" €" : c+" c";
+function minPieces(c){ let n = 0; for(const d of DENOMS){ n += Math.floor(c/d); c %= d; } return n; }
+function gCaisse(exo, comp){
+  const cfg = exo.game, n = cfg.clients.length; let i = 0, score = 0, given = [], left = 0, done = false; const log = [];
+  const {gm, hud} = shell(exo, comp);
+  intro(gm, "La caisse rapide", '<p>Le client te tend son argent. Clique sur les billets et les pièces pour lui rendre <strong>exactement</strong> sa monnaie, puis valide.</p><p>Attention : à chaque niveau, les clients sont plus pressés !</p>', () => next());
+  function sum(){ return given.reduce((s,x) => s+x, 0); }
+  function next(){
+    stopAll(); if(i >= n) return viewResult(exo, comp, score, n, recap());
+    const cl = cfg.clients[i]; given = []; done = false; left = cl.time*10;
+    hud.innerHTML = '<span>Client '+(i+1)+' / '+n+'</span><span>Niveau '+cl.lv+'</span><span>✔ '+score+'</span>';
+    gm.innerHTML = '<div class="card"><div class="timer"><div id="tm"></div></div>'+
+      '<div class="ticket"><div>🧾 Ticket : <strong>'+euro(cl.t)+'</strong></div><div>💶 Le client donne : <strong>'+euro(cl.g)+'</strong></div></div>'+
+      '<div class="tray"><span class="muted">Tu rends :</span> <strong id="sm">0,00 €</strong><div id="gv" class="given"></div></div>'+
+      '<div class="money">'+DENOMS.map(d => '<button class="'+(d>=500?'bill b'+d:'coin c'+d)+'" data-d="'+d+'">'+dLab(d)+'</button>').join('')+'</div>'+
+      '<div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn ghost" id="cl">Tout reprendre</button><button class="btn" id="ok">Rendre la monnaie</button></div><div id="fb"></div></div>';
+    const draw = () => { document.getElementById("sm").textContent = euro(sum()); document.getElementById("gv").innerHTML = given.map((d,k) => '<button class="mini" data-k="'+k+'" title="Reprendre">'+dLab(d)+'</button>').join(''); 
+      gm.querySelectorAll(".mini").forEach(b => b.onclick = () => { if(done) return; given.splice(+b.dataset.k,1); draw(); }); };
+    gm.querySelectorAll(".money button").forEach(b => b.onclick = () => { if(done) return; given.push(+b.dataset.d); draw(); });
+    document.getElementById("cl").onclick = () => { if(done) return; given = []; draw(); };
+    document.getElementById("ok").onclick = () => check(false);
+    draw();
+    const tot = left, bar = document.getElementById("tm");
+    GT = setInterval(() => { left--; bar.style.width = (left/tot*100)+"%"; if(left <= 0){ stopAll(); check(true); } }, 100);
+  }
+  function check(timeout){
+    if(done) return; done = true; stopAll();
+    const cl = cfg.clients[i], due = cl.g - cl.t, s = sum(), ok = !timeout && s === due;
+    if(ok) score++;
+    log.push({cl, ok, s, timeout});
+    let msg = ok ? '✔ Exact ! Tu as rendu '+euro(due)+'.' : (timeout ? '⏱️ Trop tard ! ' : '✘ ')+'Il fallait rendre <strong>'+euro(due)+'</strong>'+(timeout?'':', tu as rendu '+euro(s))+'.';
+    if(ok && given.length > minPieces(due)) msg += '<br>Astuce : tu pouvais le faire avec '+minPieces(due)+' pièces ou billets seulement.';
+    document.getElementById("fb").innerHTML = '<div class="fb '+(ok?'ok':'ko')+'">'+msg+'</div><div style="text-align:right;margin-top:10px"><button class="btn" id="nx">'+(i+1<n?'Client suivant':'Voir mon résultat')+'</button></div>';
+    gm.querySelectorAll(".money button, #cl, #ok").forEach(b => b.disabled = true);
+    const nx = document.getElementById("nx"); nx.focus(); nx.onclick = () => { i++; next(); };
+  }
+  function recap(){ const bad = log.filter(x => !x.ok); if(!bad.length) return ''; return '<div class="recap"><h3>À revoir</h3>'+bad.map(x => '<p>Ticket '+euro(x.cl.t)+', donné '+euro(x.cl.g)+' → monnaie : <strong>'+euro(x.cl.g-x.cl.t)+'</strong></p>').join('')+'</div>'; }
+}
+
+/* ---------- Le rayon à remplir ---------- */
+function gRayon(exo, comp){
+  const R = exo.game.rounds; let r = 0, score = 0, place = {}, sel = null, checked = false; const total = R.reduce((s,x) => s+x.items.length, 0);
+  const {gm, hud} = shell(exo, comp);
+  intro(gm, "Le rayon à remplir", '<p>Touche un produit, puis touche l\'étagère où tu veux le placer. Pour le reprendre, touche-le à nouveau.</p><p>Quand tout est placé, vérifie ton rayon.</p>', () => draw());
+  function draw(){
+    const rd = R[r];
+    hud.innerHTML = '<span>Manche '+(r+1)+' / '+R.length+'</span><span>✔ '+score+' / '+total+'</span>';
+    const tray = rd.items.map((it,k) => place[k] === undefined ? '<button class="prod'+(sel===k?' sel':'')+'" data-k="'+k+'">'+it.em+' '+it.n+'</button>' : '').join('');
+    let h = '<div class="card"><h2>'+rd.title+'</h2><p>'+rd.cons+'</p><div class="shelf">';
+    rd.levels.forEach((l,li) => {
+      h += '<div class="lvl" data-l="'+li+'"><span class="lvlname">'+l+'</span><div class="slot">'+
+        rd.items.map((it,k) => place[k] === li ? '<button class="prod placed'+(checked?(it.ok.includes(li)?' good':' bad'):'')+'" data-p="'+k+'">'+it.em+' '+it.n+'</button>' : '').join('')+'</div></div>';
+    });
+    h += '</div>';
+    if(!checked) h += '<p class="hint">Produits à placer :</p><div class="tray2">'+(tray || '<span class="muted">Tout est placé !</span>')+'</div><div style="text-align:right;margin-top:12px"><button class="btn" id="vf"'+(Object.keys(place).length<rd.items.length?' disabled':'')+'>Vérifier mon rayon</button></div>';
+    else {
+      h += '<div class="recap">'+rd.items.map((it,k) => '<p>'+(it.ok.includes(place[k])?'✔':'✘')+' <strong>'+it.n+'</strong> : '+it.e+'</p>').join('')+'</div>'+
+        '<div style="text-align:right;margin-top:12px"><button class="btn" id="nx">'+(r+1<R.length?'Manche suivante':'Voir mon résultat')+'</button></div>';
+    }
+    h += '</div>'; gm.innerHTML = h;
+    if(!checked){
+      gm.querySelectorAll(".tray2 .prod").forEach(b => b.onclick = () => { sel = +b.dataset.k; draw(); });
+      gm.querySelectorAll(".prod.placed").forEach(b => b.onclick = e => { e.stopPropagation(); delete place[+b.dataset.p]; draw(); });
+      gm.querySelectorAll(".lvl").forEach(l => l.onclick = () => { if(sel === null) return; place[sel] = +l.dataset.l; sel = null; draw(); });
+      document.getElementById("vf").onclick = () => { checked = true; rd.items.forEach((it,k) => { if(it.ok.includes(place[k])) score++; }); draw(); };
+    } else {
+      document.getElementById("nx").onclick = () => { if(r+1 < R.length){ r++; place = {}; sel = null; checked = false; draw(); } else viewResult(exo, comp, score, total, ''); };
+    }
+  }
+}
+
+/* ---------- Le tapis des dates ---------- */
+function gTapis(exo, comp){
+  const cfg = exo.game, items = cfg.items, n = items.length, O = ["Je garde","Je démarque","Je retire"]; let i = 0, score = 0, left = 0, done = false; const errs = [];
+  const {gm, hud} = shell(exo, comp);
+  intro(gm, "Le tapis des dates", '<p><strong>'+cfg.today+'</strong>. Les produits défilent : décide vite !</p><ul class="list"><li><strong>DLC dépassée</strong> ou emballage abîmé → <strong>je retire</strong></li><li><strong>DLC aujourd\'hui ou demain</strong> → <strong>je démarque</strong> (prix réduit)</li><li><strong>DDM dépassée</strong> → <strong>je démarque</strong> (il peut encore être vendu)</li><li>Sinon → <strong>je garde</strong></li></ul><p>Le tapis accélère au fil du jeu.</p>', () => next());
+  function next(){
+    stopAll(); if(i >= n) return viewResult(exo, comp, score, n, errs.length ? '<div class="recap"><h3>À revoir</h3>'+errs.map(x => '<p><strong>'+x.n+'</strong> ('+x.info+') → '+O[x.a]+'. '+x.e+'</p>').join('')+'</div>' : '');
+    const it = items[i], sec = i < 5 ? 8 : i < 10 ? 6 : 4; done = false; left = sec*10;
+    hud.innerHTML = '<span>Produit '+(i+1)+' / '+n+'</span><span>Vitesse '+(i<5?'🐢':i<10?'🐇':'🚀')+'</span><span>✔ '+score+'</span>';
+    gm.innerHTML = '<div class="card"><div class="belt"><div class="item"><span class="big">'+it.em+'</span><strong>'+it.n+'</strong><span>'+it.info+'</span></div></div><div class="timer"><div id="tm"></div></div>'+
+      '<div class="opts tapis">'+O.map((o,k) => '<button class="opt" data-k="'+k+'">'+o+'</button>').join('')+'</div><div id="fb"></div></div>';
+    gm.querySelectorAll(".opt").forEach(b => b.onclick = () => answer(+b.dataset.k));
+    const tot = left, bar = document.getElementById("tm");
+    GT = setInterval(() => { left--; bar.style.width = (left/tot*100)+"%"; if(left <= 0){ stopAll(); answer(null); } }, 100);
+  }
+  function answer(k){
+    if(done) return; done = true; stopAll();
+    const it = items[i], ok = k === it.a; if(ok) score++; else errs.push(it);
+    gm.querySelectorAll(".opt").forEach(b => { b.disabled = true; const bk = +b.dataset.k; if(bk === it.a) b.classList.add("good"); else if(bk === k) b.classList.add("bad"); });
+    document.getElementById("fb").innerHTML = '<div class="fb '+(ok?'ok':'ko')+'"><strong>'+(ok?'✔ Bien vu !':(k===null?'⏱️ Trop lent !':'✘ Raté !')+' → '+O[it.a])+'</strong>'+it.e+'</div>';
+    GTO = setTimeout(() => { i++; next(); }, ok ? 1300 : 2600);
+  }
+}
+
+/* ---------- La chasse aux anomalies ---------- */
+function gChasse(exo, comp){
+  const cfg = exo.game, ids = Object.keys(cfg.anom), total = ids.length; let found = {}, miss = 0, left = cfg.time*10, over = false;
+  const {gm, hud} = shell(exo, comp);
+  intro(gm, "La chasse aux anomalies", '<p>'+cfg.intro+'</p><p>Il y a <strong>'+total+' anomalies</strong> à trouver en '+cfg.time+' secondes. Chaque clic au mauvais endroit te coûte des points !</p>', start);
+  function cell(t, k){ return '<button class="hot'+(k&&found[k]?' found':'')+'" data-k="'+(k||'')+'">'+t+'</button>'; }
+  function start(){
+    let h = '<div class="card">'+(cfg.ref||'')+'<h3>'+cfg.title+'</h3>';
+    if(cfg.table){ h += '<div class="tablewrap"><table class="doc hunt"><tr>'+cfg.table.head.map(x => '<th>'+x+'</th>').join('')+'</tr>'+cfg.table.rows.map(r => '<tr>'+r.map(c => '<td>'+cell(c.t,c.k)+'</td>').join('')+'</tr>').join('')+'</table></div>'; }
+    if(cfg.cards){ h += '<div class="labels">'+cfg.cards.map(c => '<button class="hot label" data-k="'+(c.k||'')+'">'+c.lines.join('<br>')+'</button>').join('')+'</div>'; }
+    h += '<div id="toast"></div><div style="text-align:right;margin-top:12px"><button class="btn ghost" id="end">J\'ai fini</button></div></div>';
+    gm.innerHTML = h;
+    gm.querySelectorAll(".hot").forEach(b => b.onclick = () => {
+      if(over) return; const k = b.dataset.k, t = document.getElementById("toast");
+      if(k){ if(found[k]) return; found[k] = true; gm.querySelectorAll('.hot[data-k="'+k+'"]').forEach(x => x.classList.add("found")); t.innerHTML = '<div class="fb ok"><strong>✔ Anomalie trouvée !</strong>'+cfg.anom[k]+'</div>'; hudDraw(); if(Object.keys(found).length === total) end(); }
+      else { miss++; b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 500); t.innerHTML = '<div class="fb ko"><strong>✘ Rien d\'anormal ici.</strong></div>'; hudDraw(); }
+    });
+    document.getElementById("end").onclick = end;
+    hudDraw();
+    GT = setInterval(() => { left--; hudDraw(); if(left <= 0) end(); }, 100);
+  }
+  function hudDraw(){ hud.innerHTML = '<span>⏱️ '+Math.ceil(left/10)+' s</span><span>🔍 '+Object.keys(found).length+' / '+total+'</span><span>✘ '+miss+' clics ratés</span>'; }
+  function end(){
+    if(over) return; over = true; stopAll();
+    const f = Object.keys(found).length, score = Math.max(0, f - Math.floor(miss/2));
+    viewResult(exo, comp, score, total, '<div class="recap"><h3>Les anomalies</h3>'+ids.map(k => '<p>'+(found[k]?'✔':'✘ <em>non trouvée</em> :')+' '+cfg.anom[k]+'</p>').join('')+(miss>=2?'<p class="muted">'+miss+' clics ratés : −'+Math.floor(miss/2)+' point(s).</p>':'')+'</div>');
+  }
+}
+
+/* ---------- Le client mystère ---------- */
+function gClient(exo, comp){
+  const cfg = exo.game, N = cfg.nodes.length; let i = 0, gauge = 50, best = 0, chat = [];
+  const {gm, hud} = shell(exo, comp);
+  intro(gm, "Le client mystère", '<p>'+cfg.intro+'</p><p>Choisis tes réponses : la jauge de satisfaction du client monte ou descend selon ce que tu dis. Plusieurs fins sont possibles !</p>', () => { push(i); draw(); });
+  function push(k){ const nd = cfg.nodes[k]; chat.push(nd.narr ? {w:"narr", t:nd.narr} : {w:"cli", t:nd.say}); }
+  function face(){ return gauge >= 75 ? "😄" : gauge >= 50 ? "🙂" : gauge >= 30 ? "😐" : "😠"; }
+  function draw(fbk){
+    hud.innerHTML = '<span>'+cfg.avatar+' '+cfg.name+'</span><span class="gauge"><span style="width:'+gauge+'%"></span></span><span>'+face()+' '+gauge+' %</span>';
+    let h = '<div class="card"><div class="chat">'+chat.map(m => '<div class="msg '+m.w+'">'+m.t+'</div>').join('')+'</div>';
+    if(fbk) h += '<div class="fb '+(fbk.d>0?'ok':'ko')+'"><strong>'+(fbk.d>0?'+':'')+fbk.d+' '+(fbk.d>0?'😊':'😕')+'</strong>'+fbk.fb+'</div>';
+    if(i < N) h += '<p class="hint">Que fais-tu ou que dis-tu ?</p><div class="opts">'+cfg.nodes[i].sh.map((c,k) => '<button class="opt" data-k="'+k+'">'+c.t+'</button>').join('')+'</div>';
+    else { const end = cfg.ends.find(e => gauge >= e.min); h += '<div class="ending"><h3>'+end.title+'</h3><p>'+end.text+'</p></div><div style="text-align:right"><button class="btn" id="nx">Voir mon résultat</button></div>'; }
+    h += '</div>'; gm.innerHTML = h;
+    const ch = gm.querySelector(".chat"); ch.scrollTop = ch.scrollHeight;
+    if(i < N) gm.querySelectorAll(".opt").forEach(b => b.onclick = () => choose(cfg.nodes[i].sh[+b.dataset.k]));
+    else document.getElementById("nx").onclick = () => { const end = cfg.ends.find(e => gauge >= e.min); viewResult(exo, comp, best, N, '<div class="ending"><h3>'+end.title+'</h3><p>'+end.text+'</p><p class="muted">Satisfaction finale : '+gauge+' %</p></div>'); };
+  }
+  function choose(c){
+    const nd = cfg.nodes[i], mx = Math.max(...nd.c.map(x => x.d));
+    if(c.d === mx) best++;
+    gauge = Math.max(0, Math.min(100, gauge + c.d));
+    chat.push({w:"me", t:c.t}); i++; if(i < N) push(i);
+    draw(c);
+  }
+  cfg.nodes.forEach(nd => nd.sh = shuffle(nd.c));
+}
+
+/* ---------- Le memory ---------- */
+function gMemory(exo, comp){
+  const P = exo.game.pairs; let cards = [], open = [], found = 0, errs = 0, lock = false, t0 = 0;
+  const {gm, hud} = shell(exo, comp);
+  intro(gm, "Le memory du vocabulaire", '<p>Retourne les cartes deux par deux pour retrouver chaque <strong>mot</strong> et sa <strong>définition</strong>. Le moins d\'erreurs possible !</p>', start);
+  function start(){
+    cards = shuffle(P.flatMap((p,k) => [{k, t:p[0], s:"term"}, {k, t:p[1], s:"def"}])); t0 = Date.now();
+    gm.innerHTML = '<div class="mem">'+cards.map((c,j) => '<button class="mcard" data-j="'+j+'"><span class="back">?</span><span class="front '+c.s+'">'+c.t+'</span></button>').join('')+'</div>';
+    gm.querySelectorAll(".mcard").forEach(b => b.onclick = () => flip(+b.dataset.j, b));
+    hudDraw();
+  }
+  function hudDraw(){ hud.innerHTML = '<span>Paires : '+found+' / '+P.length+'</span><span>Erreurs : '+errs+'</span>'; }
+  function flip(j, b){
+    if(lock || b.classList.contains("on") || b.classList.contains("done")) return;
+    b.classList.add("on"); open.push([j,b]);
+    if(open.length < 2) return;
+    const [[j1,b1],[j2,b2]] = open; open = [];
+    if(cards[j1].k === cards[j2].k){ b1.classList.add("done"); b2.classList.add("done"); found++; hudDraw();
+      if(found === P.length){ const sec = Math.round((Date.now()-t0)/1000), score = Math.max(2, P.length - Math.max(0, Math.ceil((errs-3)/2)));
+        GTO = setTimeout(() => viewResult(exo, comp, score, P.length, '<p class="muted">'+errs+' erreur(s) en '+sec+' secondes. Jusqu\'à 3 erreurs, c\'est le score maximum !</p>'), 700); }
+    } else { errs++; hudDraw(); lock = true; GTO = setTimeout(() => { b1.classList.remove("on"); b2.classList.remove("on"); lock = false; }, 1000); }
+  }
+}
+
+const GAMES = { caisse:gCaisse, rayon:gRayon, tapis:gTapis, chasse:gChasse, client:gClient, memory:gMemory };
+
+/* ===================== Contenus des jeux ===================== */
+const ADD = (cid, exo) => EXOS[cid].list.push(exo);
+
+ADD("3.4", { id:"3.4-g", icon:"💶", title:"La caisse rapide", kind:"Jeu", min:5, game:{ type:"caisse", clients:[
+  {t:1340, g:2000, lv:1, time:40}, {t:785, g:1000, lv:1, time:40}, {t:430, g:500, lv:1, time:40},
+  {t:2630, g:5000, lv:2, time:30}, {t:1875, g:2075, lv:2, time:30}, {t:999, g:2000, lv:2, time:30},
+  {t:4210, g:5010, lv:3, time:22}, {t:6345, g:10000, lv:3, time:22}, {t:3180, g:5180, lv:3, time:22}
+]}});
+
+const NIVEAUX = ["Haut (chapeau)","Niveau des yeux","Niveau des mains","Bas (sol)"];
+ADD("2.1", { id:"2.1-g", icon:"🧱", title:"Le rayon à remplir", kind:"Jeu", min:5, game:{ type:"rayon", rounds:[
+  { title:"Les niveaux du rayon", cons:"Place chaque produit au bon niveau de présentation.", levels:NIVEAUX, items:[
+    {em:"💧", n:"Pack d'eau 6 × 1,5 L", ok:[3], e:"Lourd : il se place en bas, pour la sécurité des clients et du personnel."},
+    {em:"🧴", n:"Lessive liquide 5 L", ok:[3], e:"Produit lourd : niveau du sol."},
+    {em:"☕", n:"Nouveau café en capsules (lancement)", ok:[1], e:"Une nouveauté à faire connaître va au niveau des yeux, le plus vu."},
+    {em:"🍫", n:"Chocolat en promotion du mois", ok:[1,2], e:"Un produit que le magasin veut vendre en priorité se place aux yeux ou aux mains."},
+    {em:"🧻", n:"Rouleaux d'essuie-tout", ok:[0], e:"Léger et encombrant : il peut aller en haut sans danger."},
+    {em:"🍪", n:"Biscuits premier prix", ok:[2,3], e:"Le client cherche ce produit : on peut le placer plus bas et garder les yeux pour les produits à pousser."}
+  ]},
+  { title:"La rotation", cons:"Nous sommes le 7 octobre. Range les packs de yaourts du devant jusqu'au fond du rayon.", levels:["Devant","2e rang","3e rang","Au fond"], items:[
+    {em:"🥛", n:"Yaourts DLC 14/10", ok:[2], e:"Troisième date : 3e rang."},
+    {em:"🥛", n:"Yaourts DLC 08/10", ok:[0], e:"La date la plus proche passe devant : le client la prend en premier."},
+    {em:"🥛", n:"Yaourts DLC 20/10", ok:[3], e:"La date la plus lointaine va au fond."},
+    {em:"🥛", n:"Yaourts DLC 10/10", ok:[1], e:"Deuxième date la plus proche : 2e rang."}
+  ]}
+]}});
+ADD("1.3", { id:"1.3-g", icon:"🧱", title:"La réserve à ranger", kind:"Jeu", min:5, game:{ type:"rayon", rounds:[
+  { title:"Chaque chose à sa place", cons:"Range les marchandises arrivées ce matin dans la réserve.", levels:["Haut du rack","Milieu du rack","Bas du rack","Zone produits dangereux"], items:[
+    {em:"💧", n:"Palette de packs d'eau", ok:[2], e:"Lourd : toujours en bas du rack."},
+    {em:"🥫", n:"Cartons de conserves", ok:[2], e:"Cartons lourds : en bas."},
+    {em:"🍿", n:"Cartons de chips", ok:[0,1], e:"Légers : ils peuvent aller en hauteur."},
+    {em:"🧴", n:"Bidons d'eau de Javel", ok:[3], e:"Produit dangereux : zone séparée, loin des aliments."},
+    {em:"🧯", n:"Aérosols désodorisants", ok:[3], e:"Les aérosols sont inflammables : zone produits dangereux."},
+    {em:"🧻", n:"Colis de papier toilette", ok:[0], e:"Très léger et volumineux : en haut."}
+  ]},
+  { title:"Premier entré, premier sorti", cons:"Place les cartons de pâtes du devant (sortis en premier) jusqu'au fond.", levels:["Devant","2e rang","3e rang","Au fond"], items:[
+    {em:"📦", n:"Pâtes arrivées le 28/09", ok:[2], e:"Troisième arrivée : 3e rang."},
+    {em:"📦", n:"Pâtes arrivées le 02/09", ok:[0], e:"Les plus anciennes sortent en premier : devant."},
+    {em:"📦", n:"Pâtes arrivées le 05/10", ok:[3], e:"Les dernières arrivées vont au fond."},
+    {em:"📦", n:"Pâtes arrivées le 15/09", ok:[1], e:"Deuxièmes plus anciennes : 2e rang."}
+  ]}
+]}});
+
+ADD("2.1", { id:"2.1-t", icon:"🏭", title:"Le tapis des dates", kind:"Jeu", min:4, game:{ type:"tapis", today:"Aujourd'hui, nous sommes le mardi 7 octobre", items:[
+  {em:"🥛", n:"Yaourts nature", info:"DLC 15/10", a:0, e:"La date est encore loin."},
+  {em:"🥓", n:"Jambon", info:"DLC 06/10", a:2, e:"DLC dépassée hier : interdit à la vente."},
+  {em:"🍶", n:"Crème fraîche", info:"DLC 08/10", a:1, e:"DLC demain : on la vend à prix réduit."},
+  {em:"🍝", n:"Pâtes", info:"DDM 03/2027", a:0, e:"Tout va bien."},
+  {em:"🍪", n:"Biscuits", info:"DDM 30/09", a:1, e:"DDM dépassée : le produit peut encore être vendu, à prix réduit."},
+  {em:"🥫", n:"Thon en boîte", info:"DDM 2028 · boîte bombée", a:2, e:"Une boîte bombée est dangereuse, quelle que soit la date."},
+  {em:"🍗", n:"Poulet rôti", info:"DLC 07/10", a:1, e:"DLC aujourd'hui : prix réduit pour le vendre dans la journée."},
+  {em:"🥛", n:"Lait demi-écrémé", info:"DLC 20/10", a:0, e:"Date lointaine."},
+  {em:"🧀", n:"Fromage râpé", info:"DLC 05/10", a:2, e:"DLC dépassée."},
+  {em:"🧃", n:"Pack de jus", info:"DDM 2027 · pack percé", a:2, e:"Emballage abîmé : on retire."},
+  {em:"🥣", n:"Céréales", info:"DDM 12/2026", a:0, e:"Tout va bien."},
+  {em:"🥗", n:"Salade en sachet", info:"DLC 08/10", a:1, e:"DLC demain : prix réduit."},
+  {em:"🍚", n:"Riz", info:"DDM 02/10", a:1, e:"DDM dépassée : vendable à prix réduit."},
+  {em:"🥩", n:"Steak haché", info:"DLC 04/10", a:2, e:"DLC dépassée : danger pour la santé."},
+  {em:"🍎", n:"Compote", info:"DDM 2027", a:0, e:"Tout va bien."}
+]}});
+
+ADD("1.2", { id:"1.2-g", icon:"🕵️", title:"La chasse aux anomalies", kind:"Jeu", min:4, game:{ type:"chasse", time:120,
+  intro:"Compare le bon de livraison avec le bon de commande, et clique sur toutes les anomalies du bon de livraison. Nous sommes le 7 octobre.",
+  ref:'<h3>Bon de commande n°4521</h3><div class="tablewrap"><table class="doc"><tr><th>Réf.</th><th>Produit</th><th>Qté</th></tr><tr><td>1102</td><td>Jus d\'orange 1 L</td><td>12</td></tr><tr><td>2205</td><td>Pâtes 500 g</td><td>24</td></tr><tr><td>3310</td><td>Riz basmati 1 kg</td><td>6</td></tr><tr><td>6610</td><td>Yaourts nature × 4</td><td>20</td></tr><tr><td>5520</td><td>Eau gazeuse 6 × 1 L</td><td>10</td></tr><tr><td>7101</td><td>Beurre doux 250 g</td><td>15</td></tr></table></div>',
+  title:"Bon de livraison n°7788 (livré le 07/10) — clique sur les anomalies",
+  table:{ head:["Réf.","Produit","Qté livrée","Remarque à la réception"], rows:[
+    [{t:"1102"},{t:"Jus d'orange 1 L"},{t:"12"},{t:"RAS"}],
+    [{t:"2205"},{t:"Pâtes 500 g"},{t:"20",k:"q"},{t:"RAS"}],
+    [{t:"3301",k:"r"},{t:"Riz long 1 kg",k:"r"},{t:"6"},{t:"RAS"}],
+    [{t:"6610"},{t:"Yaourts nature × 4"},{t:"20"},{t:"Température : 9 °C",k:"f"}],
+    [{t:"5520"},{t:"Eau gazeuse 6 × 1 L"},{t:"10"},{t:"1 pack percé",k:"p"}],
+    [{t:"7101"},{t:"Beurre doux 250 g"},{t:"15"},{t:"DLC : 06/10",k:"d"}],
+    [{t:"4418",k:"n"},{t:"Biscuits chocolat",k:"n"},{t:"5",k:"n"},{t:"RAS"}]
+  ]},
+  anom:{ q:"Pâtes : 20 livrées au lieu de 24, il en manque 4.", r:"Riz : la référence 3301 (riz long) remplace le riz basmati commandé.", f:"Yaourts à 9 °C : la chaîne du froid est rompue.", p:"Eau gazeuse : un pack percé, produit abîmé.", d:"Beurre : la DLC du 06/10 est déjà dépassée à la livraison.", n:"Biscuits : produit livré sans avoir été commandé." }
+}});
+ADD("2.4", { id:"2.4-g", icon:"🕵️", title:"Le rayon aux étiquettes", kind:"Jeu", min:4, game:{ type:"chasse", time:90,
+  intro:"Nous sommes le 7 octobre. Contrôle les étiquettes du rayon épicerie et clique sur toutes celles qui comportent une anomalie. Aide-toi de la liste des prix en caisse.",
+  ref:'<div class="ctx"><strong>Prix enregistrés en caisse :</strong> huile 6,99 € · café 3,00 € · riz 1,89 € · jus de pomme 2,40 € · pâtes 0,95 € · miel 6,00 € · confiture 3,33 € · chocolat 1,50 €</div>',
+  title:"Le rayon épicerie",
+  cards:[
+    {lines:["<strong>Huile d'olive 1 L</strong>","6,99 €","6,99 € / L"]},
+    {lines:["<strong>Café moulu 250 g</strong>","3,00 €","12,00 € / kg"]},
+    {lines:["<strong>Riz long 1 kg</strong>","1,89 €","&nbsp;"], k:"a"},
+    {lines:["<strong>Chocolat noir 100 g</strong>","PROMO −30 % · 1,05 €","Offre valable jusqu'au 05/10"], k:"b"},
+    {lines:["<strong>Jus de pomme 1 L</strong>","2,10 €","2,10 € / L"], k:"c"},
+    {lines:["<strong>Pâtes 500 g</strong>","0,95 €","1,90 € / kg"]},
+    {lines:["<strong>Miel 500 g</strong>","6,00 €","6,00 € / kg"], k:"d"},
+    {lines:["<strong>Confiture 370 g</strong>","3,33 €","9,00 € / kg"]}
+  ],
+  anom:{ a:"Riz : le prix au kilo est obligatoire et il manque.", b:"Chocolat : la promotion est terminée depuis le 05/10, l'affiche doit être retirée.", c:"Jus de pomme : 2,10 € en rayon, mais 2,40 € en caisse.", d:"Miel : 500 g à 6 € font 12 € le kilo, pas 6 €." }
+}});
+
+const ENDS = (good, mid, bad) => [{min:75, title:"😄 Client conquis !", text:good},{min:45, title:"🙂 Peut mieux faire", text:mid},{min:0, title:"😠 Client perdu…", text:bad}];
+ADD("3.2", { id:"3.2-g", icon:"🎭", title:"Le client mystère : l'accueil", kind:"Jeu", min:4, game:{ type:"client", name:"Mme Roche", avatar:"👩‍🦳",
+  intro:"Tu travailles chez « Fil & Style ». Une cliente va entrer : réussis ton accueil du début à la fin.",
+  nodes:[
+    {narr:"Tu plies des pulls sur une table. Mme Roche entre dans la boutique.", c:[
+      {t:"Je lève la tête, je souris : « Bonjour Madame, bienvenue ! »", d:20, fb:"Le client se sent vu et attendu."},
+      {t:"Je finis ma pile de pulls, elle m'appellera si besoin.", d:-15, fb:"La cliente se sent ignorée."},
+      {t:"« Ouais, bonjour. »", d:-20, fb:"Le registre familier donne une mauvaise image du magasin."}]},
+    {say:"« Je cherche un cadeau… je regarde un peu. »", c:[
+      {t:"« Très bien, prenez votre temps. Je suis là si vous avez besoin d'un conseil. »", d:20, fb:"Disponible, sans pression."},
+      {t:"« Il faut me dire ce que vous cherchez, sinon je ne peux pas vous aider. »", d:-15, fb:"La cliente se sent pressée."},
+      {t:"Je la suis de rayon en rayon pour être prête à répondre.", d:-10, fb:"Être trop présent met mal à l'aise."}]},
+    {narr:"Le téléphone sonne au moment où Mme Roche vient vers toi avec un foulard.", c:[
+      {t:"Je lui fais un signe, je décroche : « Fil & Style, bonjour, pouvez-vous patienter un instant ? », puis je m'occupe d'elle.", d:20, fb:"Les deux clients sont respectés."},
+      {t:"Je laisse sonner sans répondre.", d:-5, fb:"Le client au téléphone est perdu."},
+      {t:"Je réponds et je règle la demande de l'appelant pendant qu'elle attend.", d:-15, fb:"La cliente présente doit rester prioritaire."}]},
+    {say:"« C'est pour ma sœur, elle adore les couleurs vives. »", c:[
+      {t:"« Bonne idée ! Nous l'avons aussi en orange et en turquoise, voulez-vous les voir ? »", d:20, fb:"Tu t'appuies sur son besoin."},
+      {t:"« Il est à 25 €. »", d:0, fb:"C'est une information, mais tu ne l'aides pas à choisir."},
+      {t:"« Moi, je préfère le noir. »", d:-15, fb:"Ton goût n'est pas le sujet : c'est celui de sa sœur."}]},
+    {say:"« Je prends le turquoise ! »", c:[
+      {t:"« Parfait ! Souhaitez-vous un paquet cadeau ? C'est offert. »", d:20, fb:"Un service qui fait plaisir et donne envie de revenir."},
+      {t:"« Carte ou espèces ? »", d:0, fb:"Correct, mais sans attention particulière."},
+      {t:"« Vous êtes sûre ? Le orange est plus joli. »", d:-20, fb:"On ne fait pas douter un client qui a choisi."}]}
+  ],
+  ends:ENDS("Mme Roche repart ravie avec son paquet cadeau et promet de revenir pour son propre anniversaire.","Mme Roche achète le foulard, mais l'accueil aurait pu être plus chaleureux.","Mme Roche repose le foulard et quitte la boutique sans rien acheter.")
+}});
+ADD("3.3", { id:"3.3-g", icon:"🎭", title:"Le client mystère : le conseil", kind:"Jeu", min:5, game:{ type:"client", name:"M. Petit", avatar:"🧔",
+  intro:"Tu es vendeur ou vendeuse au rayon running du « Vestiaire ». Un client arrive : découvre son besoin et conseille-le jusqu'au bout.",
+  nodes:[
+    {say:"« Bonjour, je voudrais des chaussures de course. »", c:[
+      {t:"« Bonjour Monsieur ! Vous courez plutôt sur route ou en forêt, et à quel rythme ? »", d:20, fb:"Des questions ouvertes pour découvrir le besoin."},
+      {t:"« Elles sont au fond du magasin, à gauche. »", d:-15, fb:"Tu l'orientes, mais tu ne le conseilles pas."},
+      {t:"« Prenez celles-ci : ce sont les plus chères, donc les meilleures. »", d:-20, fb:"Tu proposes un produit sans connaître son besoin."}]},
+    {say:"« Sur route, trois fois par semaine. Depuis quelque temps, j'ai un peu mal aux genoux. »", c:[
+      {t:"« Je vais vous montrer des modèles avec un bon amorti, pour protéger vos genoux. »", d:20, fb:"Tu as repéré ses mobiles : confort et sécurité."},
+      {t:"« Ces chaussures sont en promotion cette semaine. »", d:-5, fb:"Tu ne réponds pas à son problème de genoux."},
+      {t:"« Il faudrait voir un médecin, je ne peux rien pour vous. »", d:-10, fb:"Tu peux l'aider avec un produit adapté, tout en restant prudent(e)."}]},
+    {say:"« Celles-ci me plaisent, mais 120 €, c'est un peu cher… »", c:[
+      {t:"« Elles ont un amorti renforcé : vos genoux seront moins sollicités. Essayez-les sur notre tapis de course, vous sentirez la différence. »", d:20, fb:"Caractéristique, avantage, preuve : un vrai argument CAP."},
+      {t:"« C'est le prix. »", d:-20, fb:"L'objection n'est pas traitée."},
+      {t:"« Ce modèle à 60 € coûte moins cher, mais il n'est pas fait pour la route. »", d:-10, fb:"Moins cher, mais inadapté à son besoin."}]},
+    {say:"Il les essaie : « Elles sont très confortables, je les prends ! »", c:[
+      {t:"« Excellent choix ! Des chaussettes techniques évitent les ampoules : je vous en montre une paire ? »", d:20, fb:"Une vente additionnelle utile, liée à son achat."},
+      {t:"« La caisse est par là. »", d:0, fb:"Correct, mais tu passes à côté d'un conseil utile."},
+      {t:"« Prenez aussi la montre GPS à 300 €, tout le monde l'a. »", d:-15, fb:"Forcer une vente coûteuse sans lien avec son besoin agace le client."}]},
+    {say:"« Et si la taille ne va pas, je n'aurai pas le temps de revenir… »", c:[
+      {t:"« Vous avez 30 jours pour les échanger avec votre ticket, dans n'importe lequel de nos magasins. »", d:20, fb:"Tu rassures avec un service précis."},
+      {t:"« Je ne sais pas trop. »", d:-10, fb:"Le client repart avec un doute."},
+      {t:"« Ce n'est pas mon problème. »", d:-20, fb:"Une réponse qui fait fuir le client."}]}
+  ],
+  ends:ENDS("M. Petit repart avec ses chaussures et ses chaussettes, et il reviendra demander conseil pour sa prochaine course.","M. Petit achète les chaussures, mais tu aurais pu mieux le conseiller.","M. Petit repart sans rien acheter : il commandera sur internet.")
+}});
+ADD("3.5", { id:"3.5-g", icon:"🎭", title:"Le client mystère : la réclamation", kind:"Jeu", min:5, game:{ type:"client", name:"M. Garcia", avatar:"👨",
+  intro:"Tu es à l'accueil de « Brico Plus ». Un client mécontent arrive : garde ton calme et transforme sa colère en satisfaction.",
+  nodes:[
+    {say:"« Votre perceuse ne marche déjà plus ! C'est n'importe quoi ! »", c:[
+      {t:"Je l'écoute jusqu'au bout sans l'interrompre, en le regardant.", d:20, fb:"Écouter fait baisser la tension."},
+      {t:"« Calmez-vous, Monsieur ! »", d:-20, fb:"Ordonner à quelqu'un de se calmer l'énerve encore plus."},
+      {t:"« Ce n'est pas moi qui l'ai fabriquée. »", d:-20, fb:"Se défendre n'aide pas le client."}]},
+    {say:"« Je l'ai achetée il y a trois mois, et elle s'arrête au bout de quelques secondes. »", c:[
+      {t:"« Si je comprends bien, votre perceuse achetée il y a trois mois s'arrête après quelques secondes, c'est bien ça ? »", d:20, fb:"La reformulation montre que tu as compris."},
+      {t:"« Vous l'avez peut-être mal utilisée. »", d:-20, fb:"Accuser le client est la pire réaction."},
+      {t:"« Ah. »", d:-10, fb:"Le client ne se sent pas écouté."}]},
+    {say:"« Oui, exactement. Et j'ai un chantier ce week-end ! »", c:[
+      {t:"« Je suis désolé(e) pour ce désagrément. Avez-vous votre ticket de caisse ? »", d:20, fb:"Tu t'excuses et tu avances vers une solution."},
+      {t:"« Il fallait acheter un modèle plus solide. »", d:-25, fb:"Tu fais la leçon au client."},
+      {t:"« Revenez lundi, le responsable sera là. »", d:-15, fb:"Tu le laisses sans solution pour son chantier."}]},
+    {say:"« Le voici. Je veux être remboursé ! »", c:[
+      {t:"« Elle est sous garantie : je peux vous l'échanger tout de suite. Pour un remboursement, je dois demander à mon responsable. Que préférez-vous ? »", d:20, fb:"Tu proposes une solution dans tes compétences et tu sais transmettre."},
+      {t:"« Je vous rembourse tout de suite. »", d:-10, fb:"Tu dépasses ce que tu as le droit de faire."},
+      {t:"« Ce n'est pas possible. »", d:-20, fb:"Un refus sans solution fait perdre le client."}]},
+    {say:"« Un échange, pour avoir une perceuse ce week-end. »", c:[
+      {t:"« Je vous prépare l'échange. Merci de votre patience, et bon courage pour votre chantier ! »", d:20, fb:"Une fin personnalisée qui laisse une bonne impression."},
+      {t:"« Ok. »", d:0, fb:"Correct, mais froid."},
+      {t:"« Voilà. Au suivant ! »", d:-15, fb:"Le client repart avec une mauvaise impression."}]}
+  ],
+  ends:ENDS("M. Garcia repart avec une perceuse neuve et le sourire : il recommandera le magasin à ses amis.","Le problème est réglé, mais M. Garcia garde un souvenir mitigé.","M. Garcia repart furieux et laisse un avis négatif sur internet.")
+}});
+
+const MEM = (cid, title, pairs) => ADD(cid, { id:cid+"-m", icon:"🃏", title:title, kind:"Jeu", min:3, game:{ type:"memory", pairs } });
+MEM("1.1","Le memory des commandes",[["Ménage","Agent qui consomme des biens et des services"],["Circuit court","Un seul intermédiaire"],["Circuit long","Deux intermédiaires ou plus"],["Rupture de stock","Le produit manque alors que des clients le demandent"],["Cadencier","Tableau qui suit stocks, commandes, livraisons et ventes"],["Stock de sécurité","Quantité minimale pour éviter la rupture"]]);
+MEM("1.4","Le memory des commandes clients",[["Click & collect","Commander en ligne, retirer en magasin"],["Drive","Récupérer ses courses sans quitter sa voiture"],["Picking","Prélever les produits d'une commande"],["Ship from store","Expédier une commande depuis un magasin"],["Sac isotherme","Garder les produits au froid"],["Bon de préparation","Liste des produits à prélever"]]);
+MEM("2.2","Le memory de la mise en valeur",[["Zone chaude","Endroit très fréquenté"],["Zone froide","Endroit peu fréquenté"],["Tête de gondole","Bout de rayon très visible"],["Achat d'impulsion","Achat non prévu"],["Théâtralisation","Mise en scène des produits"],["Facteurs d'ambiance","Sons, odeurs, lumière, couleurs"]]);
+MEM("2.3","Le memory des prix",[["Prix HT","Prix sans la TVA"],["Prix TTC","Prix payé par le client, TVA comprise"],["TVA","Impôt collecté pour l'État"],["Conditionnement","En contact direct avec le produit"],["Emballage","Protège pendant le transport"],["Coefficient 1,20","Passer du HT au TTC avec 20 % de TVA"]]);
+MEM("2.5","Le memory de la démarque",[["Démarque connue","Perte identifiée et enregistrée"],["Démarque inconnue","Écart découvert à l'inventaire"],["Inventaire","Compter tout le stock"],["Stock théorique","Stock indiqué par le logiciel"],["Antivol","Déclenche l'alarme au portique"],["Don alimentaire","Donner les invendus encore consommables"]]);
+MEM("3.1","Le memory du salarié",[["CDI","Contrat sans date de fin"],["CDD","Contrat avec une date de fin"],["Intérim","Salarié mis à disposition par une agence"],["Démission","Le salarié décide de partir"],["Règlement intérieur","Les règles de vie de l'entreprise"],["Fond de caisse","Monnaie présente à l'ouverture"]]);
+MEM("T1","Le memory de l'omnicanal",[["Omnicanal","Canaux reliés entre eux"],["Canal digital","Site, application, réseaux sociaux"],["Canal physique","Le magasin et ses vendeurs"],["E-réservation","Réserver en ligne, essayer en magasin"],["Retour en magasin","Rendre en boutique un achat fait en ligne"],["Borne interactive","Écran en magasin pour s'informer ou commander"]]);
+MEM("T2","Le memory de la fidélisation",[["Fidélisation","Donner envie au client de revenir"],["Satisfaction","Le client est content de son achat"],["Carte de fidélité","Cumuler des avantages à chaque achat"],["Questionnaire","Recueillir l'avis des clients"],["Parrainage","Le client recommande un proche"],["RGPD","Protège les données personnelles"]]);
+MEM("T3","Le memory des chiffres",[["Panier moyen","Chiffre d'affaires ÷ nombre de tickets"],["Chiffre d'affaires","Total des ventes"],["Taux de satisfaction","Satisfaits ÷ répondants × 100"],["Question ouverte","Le client répond librement"],["Question fermée","Réponse oui ou non"],["Échantillon","Les clients interrogés"]]);
+MEM("T4","Le memory du lycée pro",[["Droit de rétractation","14 jours pour changer d'avis après un achat à distance"],["Garantie de conformité","2 ans pour un produit neuf"],["Agent économique","Ménage, entreprise, banque, État…"],["Contrat de vente","Accord sur la chose et sur le prix"],["« Donc »","Introduit une conséquence"],["« En revanche »","Introduit une opposition"]]);
+
+
+viewLogin();
+</script>
+</body>
+</html>
